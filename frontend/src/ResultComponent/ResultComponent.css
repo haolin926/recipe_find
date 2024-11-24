@@ -1,0 +1,84 @@
+#content{
+    display: flex;
+    background: whitesmoke;
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+#instruction_list{
+    width: 30%;
+    margin: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    margin-left: auto;
+}
+#instruction_list h2{
+    text-align: center;
+    margin: 0;
+    padding: 10px;
+    background: #f1f1f1;
+    border-bottom: 1px solid black;
+
+}
+#steps{
+    padding: 0;
+    list-style-type: decimal;
+    list-style-position: inside;
+}
+#steps li{
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 40px;
+    line-height: 1.6;
+}
+
+#upper_content{
+    display: flex;
+    width: 100%;
+}
+#recipe_name{
+    padding: 10px;
+    font-size: 20px;
+    text-align: center;
+    margin-left: 30px;
+}
+#header{
+    display: flex;
+    justify-content: center;
+}
+.info_list{
+    width: 50%;
+    margin: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+}
+.info_list li{
+    position: relative;
+    padding-bottom: 5px;
+    line-height: 1.6;
+}
+#ingredient_list{
+    margin-right: 10px;
+    margin-left: 20px;
+}
+#nutrition_list{
+    margin-left: 10px;
+    margin-right: 20px;
+}
+#lower_content{
+    display: flex;
+    width: 100%;
+}
+#dish{
+    display: flex;
+    flex-direction: column;
+}
+#recipe_image{
+    width: 100%;
+    height: 100%;
+    margin: 10px;
+    border-radius: 5px;
+    padding: 10px;
+}
