@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import "./HomeComponent.css";
 import {withRouter} from "../withRouter/withRouter";
-
+import DialogComponent from "../DialogComponent/DialogComponent";
 class HomeComponent extends Component {
     constructor(props) {
         super(props);
@@ -9,7 +9,9 @@ class HomeComponent extends Component {
             image: null,
             previewURL: null,
             name: null,
-            loading: false
+            loading: false,
+            dialogOpen: false,
+            predictName: null
         };
     }
 
@@ -34,10 +36,13 @@ class HomeComponent extends Component {
                         this.setState({loading: false});
                         throw new Error("Error uploading image");
                     }
-                    return response.json();
+                    return response.text();
                 }).then(data => {
-                    this.setState({loading: false});
-                    this.props.navigate("/result", {state: {data: data}});
+                    this.setState({
+                        loading: false,
+                        dialogOpen: true,
+                        predictName: data
+                    });
                 }).catch(error => {
                     this.setState({loading: false});
                     console.error("Error uploading image: ", error);
@@ -50,7 +55,7 @@ class HomeComponent extends Component {
         }
     }
 
-    inputText = async() => {
+    inputText = () => {
         const name = document.getElementById("nameUpload").value;
         if(name === "" || name === null) {
             alert("Please input a name");
@@ -61,6 +66,12 @@ class HomeComponent extends Component {
             loading: true
         });
 
+        this.getRecipe(name).catch(() => {
+            this.setState({loading: false});
+        });
+    }
+
+    getRecipe = async (name) => {
         try {
             const response = await fetch(`http://localhost:8080/api/recipe/name?queryName=${encodeURIComponent(name)}`, {
                 method: "GET",
@@ -82,11 +93,20 @@ class HomeComponent extends Component {
         }
     }
 
+    closeDialog = () => {
+        this.setState({dialogOpen: false});
+    }
+
     render() {
         return (
             <div>
                 <h1>Home</h1>
                 <div id={"content"}>
+                    {this.state.dialogOpen &&
+                        <DialogComponent
+                            onClose={this.closeDialog}
+                            predictName={this.state.predictName}
+                            getRecipe={this.getRecipe}/>}
                     {this.state.loading === false && <div id={"image_section"}>
                         <h2>Upload an dish image</h2>
                         <label id="inputImageLabel" htmlFor="imageUpload" style={{border: "1px solid black"}}>Upload an Image</label>

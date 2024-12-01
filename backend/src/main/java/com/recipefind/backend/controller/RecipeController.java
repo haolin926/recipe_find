@@ -24,11 +24,9 @@ public class RecipeController {
     }
 
     @PostMapping(value="/image", consumes="multipart/form-data")
-    public Recipe getRecipeByImage(@RequestParam("image") MultipartFile image) throws JsonProcessingException {
+    public String getRecipeByImage(@RequestParam("image") MultipartFile image) throws JsonProcessingException {
         System.out.println("File name" + image.getOriginalFilename());
-        String predictedName = recipeService.predictName(image);
-        System.out.println("Predicted Name: " + predictedName);
-        return recipeService.constructRecipe(predictedName);
+        return recipeService.predictName(image);
     }
 
 }

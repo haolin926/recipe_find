@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
@@ -112,7 +113,8 @@ public class RecipeServiceImpl implements RecipeService {
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 JsonNode jsonNode = objectMapper.readTree(response);
-                return jsonNode.path("dish_name").asText().replace("_", " ");
+                String name = jsonNode.path("dish_name").asText().replace("_", " ");
+                return StringUtils.capitalize(name);
             } else {
                 return "Prediction failed";
             }
