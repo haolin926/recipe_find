@@ -1,7 +1,9 @@
 import React, {Component} from "react";
-import "./HomeComponent.css";
 import {withRouter} from "../withRouter/withRouter";
-import DialogComponent from "../DialogComponent/DialogComponent";
+import { Button } from 'antd';
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import "./HomeComponent.css";
 class HomeComponent extends Component {
     constructor(props) {
         super(props);
@@ -11,9 +13,18 @@ class HomeComponent extends Component {
             name: null,
             loading: false,
             dialogOpen: false,
-            predictName: null
+            predictName: null,
         };
     }
+
+    handleSearchByNameClick = () => {
+        this.props.navigate("/search", {state: {value:"1"}});
+    }
+
+    handleSearchByImageClick = () => {
+        this.props.navigate("/search", {state: {value:"2"}});
+    }
+
 
     uploadImage = (event) => {
         const file = event.target.files[0];
@@ -99,33 +110,20 @@ class HomeComponent extends Component {
 
     render() {
         return (
-            <div>
-                <h1>Home</h1>
-                <div id={"content"}>
-                    {this.state.dialogOpen &&
-                        <DialogComponent
-                            onClose={this.closeDialog}
-                            predictName={this.state.predictName}
-                            getRecipe={this.getRecipe}/>}
-                    {this.state.loading === false && <div id={"image_section"}>
-                        <h2>Upload an dish image</h2>
-                        <label id="inputImageLabel" htmlFor="imageUpload" style={{border: "1px solid black"}}>Upload an Image</label>
-                        <input id="imageUpload"
-                               type="file"
-                               accept="image/*"
-                               onChange={this.uploadImage}/>
-                    </div>}
-                    {this.state.loading === false && <div id={"name_section"}>
-                        <h2>Input a dish name</h2>
-                        <input id="nameUpload" type="text"/>
-                        <button onClick={this.inputText}>Upload</button>
-                    </div>}
-                    {this.state.loading && <div id={"loading_section"}>
-                        <h2>Processing...</h2>
-                        <div className="spinner"></div>
-                    </div>}
-                </div>
-            </div>
+            <Box className={"bodyBackground"}>
+                <Box
+                    sx={{display:"flex", width:"100%", flexDirection: "column", gap: "30px", paddingTop:"8px", height: "100%", margin:0, alignItems:"center"}}>
+                        <Box sx={{display:"flex", width:"100%", flexDirection: "column", gap: "30px", padding: "8px", maxWidth:"none", marginTop:"20%", paddingLeft:"10%"}}>
+                            <Box sx={{width:"30%"}}>
+                                <Typography variant="h3" sx={{color:"#141414"}}>LOOK FOR RECIPES</Typography>
+                            </Box>
+                            <Box sx={{display:"flex", width:"100%", flexDirection: "row", gap:"20px"}}>
+                                <Button className="mainButton" type="text" size="large" onClick={this.handleSearchByNameClick}>Search Recipe by Name</Button>
+                                <Button className="mainButton" type="text" size="large" onClick={this.handleSearchByImageClick}>Search by Uploading Image</Button>
+                            </Box>
+                        </Box>
+                </Box>
+            </Box>
         );
     }
 }

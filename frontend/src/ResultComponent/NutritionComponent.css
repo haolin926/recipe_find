@@ -1,0 +1,13 @@
+.greyDots li button{
+    background-color: grey ! important;
+}
+
+.greyDots .slick-active button {
+    background-color: black ! important;
+}
+.carouselItem {
+    display: flex;
+    height: 30vh;
+    width: 100%;
+    align-items: center;
+}
