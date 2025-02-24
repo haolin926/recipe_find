@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recipefind.backend.entity.*;
-import com.recipefind.backend.service.FatSecretService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import com.recipefind.backend.service.RecipeService;
@@ -18,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @Service
 public class RecipeServiceImpl implements RecipeService {
     private final RestTemplate restTemplate;
@@ -29,9 +30,10 @@ public class RecipeServiceImpl implements RecipeService {
             "Carbohydrates",
             "Protein"
     );;
-    private static final String apiKey = "00ca39c7f34945afbe78f7288a036107";
+    private static final Dotenv dotenv = Dotenv.load();
+    private static final String apiKey = dotenv.get("SPOONACULAR_API_KEY");
 
-    private static final String GOOGLE_VISION_API_KEY = "AIzaSyAfnZiOJsNW1ggEBSD__JYpa4YqyBav4mM";
+    private static final String GOOGLE_VISION_API_KEY = dotenv.get("GOOGLE_VISION_API_KEY");
 
     private static final int MAX_RETRIES = 5;
     private static final long RETRY_DELAY = 500; // 500 ms delay
