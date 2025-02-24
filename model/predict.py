@@ -28,9 +28,15 @@ def predict():
         image = Image.open(image)
         processed_image = preprocess_image(image)
         predictions = model.predict(processed_image)
-        predicted_class = class_names[np.argmax(predictions[0])]
+
+        return_number = 5
+        top_indices = np.argsort(predictions[0])[-return_number:][::-1]
+        result = [
+            {"dish_name" : class_names[idx], "probability" : float(predictions[0][idx])}
+            for idx in top_indices
+        ]
         
-        return jsonify({'dish_name': predicted_class})
+        return jsonify({"predictions":result})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
