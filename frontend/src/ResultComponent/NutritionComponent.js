@@ -62,7 +62,7 @@ const NutritionComponent = ({nutrition}) => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {nutrition.map((nutrient, index) => (
+                                    {nutrition.map((nutrient,) => (
                                         <TableRow>
                                             <TableCell>{nutrient.name}</TableCell>
                                             <TableCell>{nutrient.amount}</TableCell>
