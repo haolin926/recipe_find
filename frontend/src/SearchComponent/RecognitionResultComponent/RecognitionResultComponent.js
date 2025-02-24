@@ -1,10 +1,8 @@
 import Box from "@mui/material/Box";
 import "./RecognitionResultComponent.css";
 import {Link, Paper} from "@mui/material";
-import {Button, Tag} from 'antd'
+import {Button, Tag, Typography, Divider, Flex, Progress} from 'antd'
 import React from 'react';
-import {Divider, Flex, Progress} from "antd";
-import {Typography} from 'antd';
 
 function RecognitionResultComponent ( {predictions, image, onSearchByName}) {
     const [selectedTags, setSelectedTags] = React.useState([]);

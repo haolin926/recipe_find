@@ -6,6 +6,8 @@ import {DownOutlined} from "@ant-design/icons";
 import Typography from "@mui/material/Typography";
 import React from "react";
 import "./ResultComponent.css";
+import PropTypes from 'prop-types';
+
 const ResultComponent = ({instructions}) => {
 
     return (
@@ -37,7 +39,7 @@ const ResultComponent = ({instructions}) => {
                                     <Typography component="span">Step {index + 1}</Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                    {instruction}
+                                    <Typography>{instruction}</Typography>
                                 </AccordionDetails>
                             </Accordion>
                         </ListItem>
@@ -46,6 +48,9 @@ const ResultComponent = ({instructions}) => {
             </Box>
         </Box>
     );
-}
+};
 
+ResultComponent.propTypes = {
+    instructions: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
 export default ResultComponent;

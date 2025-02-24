@@ -6,6 +6,8 @@ import React from "react";
 import "./ResultComponent.css";
 import "./NutritionComponent.css";
 import {Carousel} from "antd";
+import PropTypes from 'prop-types';
+
 const NutritionComponent = ({nutrition}) => {
     const pieChartData = nutrition.map((nutrient, index) => ({
         id: index,
@@ -61,7 +63,7 @@ const NutritionComponent = ({nutrition}) => {
                                 </TableHead>
                                 <TableBody>
                                     {nutrition.map((nutrient, index) => (
-                                        <TableRow key={index}>
+                                        <TableRow>
                                             <TableCell>{nutrient.name}</TableCell>
                                             <TableCell>{nutrient.amount}</TableCell>
                                             <TableCell>g</TableCell>
@@ -74,6 +76,15 @@ const NutritionComponent = ({nutrition}) => {
                 </Box>
             </Box>
     );
+}
+
+NutritionComponent.propTypes = {
+    nutrition: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            amount: PropTypes.number.isRequired,
+        })
+    ).isRequired,
 }
 
 export default NutritionComponent;

@@ -10,7 +10,6 @@ import {Content, Header} from "antd/es/layout/layout";
 import {createTheme} from "@mui/material/styles";
 import {ThemeProvider} from "@mui/material";
 import ResponsiveDrawer from "./SideBarComponent/sideBar";
-import './App.css';
 import SavedRecipeComponent from "./SavedRecipeComponent/SavedRecipeComponent";
 import SearchComponent from "./SearchComponent/SearchComponent";
 const muiTheme = createTheme({
