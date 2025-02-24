@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Ingredient {
+public class Nutrition {
     @JsonProperty("id")
     private int id;
     @JsonProperty("name")
@@ -18,8 +18,8 @@ public class Ingredient {
 
     private String amount;
 
-    public Ingredient(String name, String amountUnit) {
+    public Nutrition(String name, String amount) {
         this.name = name;
-        this.amount = amountUnit;
+        this.amount = amount;
     }
 }

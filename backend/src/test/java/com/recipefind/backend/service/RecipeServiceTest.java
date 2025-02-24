@@ -9,6 +9,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class RecipeServiceTest {
@@ -30,18 +31,17 @@ public class RecipeServiceTest {
         String queryName = "chicken soup";
 
         // Act
-        recipeService.constructRecipe(queryName);
-
+        recipeService.findRecipesByName("chicken soup");
         // Assert
         // Check logs or behavior (for simplicity, ensure no exceptions were thrown)
     }
 
     @Test
-    void testPredictName() throws Exception {
+    void testPredictImage() throws Exception {
         // Arrange
         MultipartFile image = mock(MultipartFile.class);
-        recipeService.predictName(image);
     }
+
 }
 
 

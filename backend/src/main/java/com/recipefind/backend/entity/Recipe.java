@@ -1,52 +1,30 @@
 package com.recipefind.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+@Entity
+@Table(name = "recipes")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Recipe {
-    private String id;
 
-    @JsonProperty("name")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "recipe_id", nullable = false)
+    private int recipeId;
+
+    @Column(name = "recipe_api_id", nullable = false)
+    private Integer recipeApiId;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(name = "recipe_name")
     private String name;
 
-    @JsonProperty("image")
-    private String image;
+    @Column(name = "recipe_description")
+    private String description;
 
-    @JsonProperty("instructions")
-    private List<String> instructions = new ArrayList<>();
-
-    @JsonProperty("ingredients")
-    private List<Map<String, String>> ingredients = new ArrayList<>();
-
-    @JsonProperty("nutrition")
-    private List<Map<String, String>> nutrition = new ArrayList<>();
-
-    public void addInstruction(String instruction) {
-        instructions.add(instruction);
-    }
-    public void addIngredient(String ingredient, String amount_unit) {
-        Map<String, String> ingredientMap = new HashMap<>();
-        ingredientMap.put("ingredient", ingredient);
-        ingredientMap.put("amount_unit", amount_unit);
-        ingredients.add(ingredientMap);
-    }
-
-    public void addNutrition(String nutrient, String amount_unit) {
-        Map<String, String> nutritionMap = new HashMap<>();
-        nutritionMap.put("nutrient", nutrient);
-        nutritionMap.put("amount_unit", amount_unit);
-        nutrition.add(nutritionMap);
-    }
-
+    @Column(name = "instruction")
+    private String instruction;
 }
