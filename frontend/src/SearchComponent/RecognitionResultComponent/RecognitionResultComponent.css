@@ -1,0 +1,68 @@
+.container{
+    width:100%;
+    height:100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding:10px;
+    gap:1%;
+}
+.recognizeImage {
+    height:100%;
+    width:100%;
+    object-fit: cover;
+}
+.predictionResultContainer {
+    display: flex;
+    align-items: center;
+    width:50%;
+    border:1px solid black;
+    max-height:100%;
+    overflow-y: auto;
+    flex-direction: column;
+}
+.predict_probability_container {
+    display: flex;
+    flex-direction: column;
+    gap:5px;
+    width:100%;
+}
+.ingredientTags{
+    font-size: 14px;
+    padding: 10px;
+}
+.predictImageContainer{
+    display: flex;
+    width:50%;
+    height:100%;
+    max-height: 100%;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+.predictResult{
+    width:100%;
+    height:100%;
+    display: flex;
+    padding:10px;
+    flex-direction: column;
+    align-items: center;
+    position:relative;
+}
+.bottomRightButton {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+.nameAndProbability {
+    width: 100%;
+}
+
+.predictionText {
+    color: black;
+    transition: color 0.3s;
+}
+
+.predictionText:hover {
+    color:#e67e22;
+}

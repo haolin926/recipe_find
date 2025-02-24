@@ -6,7 +6,12 @@ import React from "react";
 import "./ResultComponent.css";
 import "./NutritionComponent.css";
 import {Carousel} from "antd";
-const NutritionComponent = () => {
+const NutritionComponent = ({nutrition}) => {
+    const pieChartData = nutrition.map((nutrient, index) => ({
+        id: index,
+        value: nutrient.amount,
+        label: nutrient.name,
+    }));
     return (
             <Box className="bottomContainerPaper">
                 <AppBar position="static" sx={{width:"100%", borderRadius: "5px", display:"flex", justifyContent:"center", alignItems:"center"}}>
@@ -20,13 +25,7 @@ const NutritionComponent = () => {
                                 <PieChart
                                     series={[
                                         {
-                                            data: [
-                                                { id: 0, value: 10, label: 'series A' },
-                                                { id: 1, value: 15, label: 'series B' },
-                                                { id: 2, value: 20, label: 'series C' },
-                                                { id: 4, value: 10, label: 'series D' },
-                                                { id: 5, value: 15, label: 'series E' },
-                                            ],
+                                            data: pieChartData,
                                             innerRadius: 50,
                                             outerRadius: 100,
                                             paddingAngle: 5,
@@ -61,36 +60,13 @@ const NutritionComponent = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    <TableRow>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                        <TableCell>1</TableCell>
-                                    </TableRow>
+                                    {nutrition.map((nutrient, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{nutrient.name}</TableCell>
+                                            <TableCell>{nutrient.amount}</TableCell>
+                                            <TableCell>g</TableCell>
+                                        </TableRow>
+                                    ))}
                                 </TableBody>
                             </Table>
                         </TableContainer>

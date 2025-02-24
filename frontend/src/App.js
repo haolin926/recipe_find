@@ -40,14 +40,14 @@ function App() {
           }}
       >
           <ThemeProvider theme={muiTheme}>
-              <Layout>
+              <Layout style={{height:"100vh"}}>
                   <Header>
                       <ResponsiveAppBar toggleDrawer={toggleDrawer}></ResponsiveAppBar>
                   </Header>
                   <Layout>
                       <Router>
                           <ResponsiveDrawer visible={drawerVisible} toggleDrawer={toggleDrawer}></ResponsiveDrawer>
-                          <Content style={{}}>
+                          <Content style={{overflow:"auto"}}>
                               <Routes>
                                   <Route path={"/"} element={<HomeComponent/>}/>
                                   <Route path={"/result"} element={<ResultComponent/>}/>

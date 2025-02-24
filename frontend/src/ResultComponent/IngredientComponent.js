@@ -6,8 +6,16 @@ import "./ResultComponent.css";
 import {FloatButton} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
 
-const IngredientComponent = () => {
+const IngredientComponent = (ingredients) => {
 
+    const [rows, setRows] = useState(
+        ingredients.ingredients.map((ingredient, index) => ({
+            id: index,
+            name: ingredient.name,
+            amount: ingredient.amount,
+            selected: false,
+        }))
+    );
     const handleCheckboxChange = (id) => {
         setRows((prevRows) =>
             prevRows.map((row) =>
@@ -15,13 +23,6 @@ const IngredientComponent = () => {
             )
         );
     };
-
-    const [rows, setRows] = useState([
-        { id: 1, name: "John Doe", role: "Admin", selected: false },
-        { id: 2, name: "Jane Smith", role: "Editor", selected: false },
-        { id: 3, name: "Alice Johnson", role: "Viewer", selected: false },
-        { id: 3, name: "Alice Johnson", role: "Viewer", selected: false },
-    ]);
 
     const handleSelectAll = (event) => {
         const isChecked = event.target.checked;
@@ -50,7 +51,6 @@ const IngredientComponent = () => {
                             </TableCell>
                             <TableCell>Ingredient</TableCell>
                             <TableCell>Amount</TableCell>
-                            <TableCell>Unit</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -62,9 +62,8 @@ const IngredientComponent = () => {
                                         onChange={() => handleCheckboxChange(row.id)}
                                     />
                                 </TableCell>
-                                <TableCell>{row.id}</TableCell>
                                 <TableCell>{row.name}</TableCell>
-                                <TableCell>{row.role}</TableCell>
+                                <TableCell>{row.amount}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

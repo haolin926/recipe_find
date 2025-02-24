@@ -6,11 +6,11 @@ import {DownOutlined} from "@ant-design/icons";
 import Typography from "@mui/material/Typography";
 import React from "react";
 import "./ResultComponent.css";
-const ResultComponent = () => {
+const ResultComponent = ({instructions}) => {
 
     return (
         <Box className="bottomContainerPaper">
-            <AppBar position="static" sx={{width:"100%", borderRadius: "5px", display:"flex", justifyContent:"center", alignItems:"center"}}>
+            <AppBar position="static" className={"commonHeader"}>
                 <h1>Instructions</h1>
             </AppBar>
             <Box sx={{
@@ -26,81 +26,22 @@ const ResultComponent = () => {
                         width: '80%',
                         margin: 'auto',
                     }}>
-                    <ListItem>
-                        <Accordion sx={{width:"100%"}}>
-                            <AccordionSummary
-                                expandIcon={<DownOutlined />}
-                                aria-controls="panel1-content"
-                                id="panel1-header"
-                            >
-                                <Typography component="span">Step 1</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                malesuada lacus ex, sit amet blandit leo lobortis eget.
-                            </AccordionDetails>
-                        </Accordion>
-                    </ListItem>
-                    <ListItem>
-                        <Accordion>
-                            <AccordionSummary
-                                expandIcon={<DownOutlined />}
-                                aria-controls="panel1-content"
-                                id="panel1-header"
-                            >
-                                <Typography component="span">Step 1</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                malesuada lacus ex, sit amet blandit leo lobortis eget.
-                            </AccordionDetails>
-                        </Accordion>
-                    </ListItem>
-                    <ListItem>
-                        <Accordion>
-                            <AccordionSummary
-                                expandIcon={<DownOutlined />}
-                                aria-controls="panel1-content"
-                                id="panel1-header"
-                            >
-                                <Typography component="span">Step 1</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                malesuada lacus ex, sit amet blandit leo lobortis eget.
-                            </AccordionDetails>
-                        </Accordion>
-                    </ListItem>
-                    <ListItem>
-                        <Accordion>
-                            <AccordionSummary
-                                expandIcon={<DownOutlined />}
-                                aria-controls="panel1-content"
-                                id="panel1-header"
-                            >
-                                <Typography component="span">Step 1</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                malesuada lacus ex, sit amet blandit leo lobortis eget.
-                            </AccordionDetails>
-                        </Accordion>
-                    </ListItem>
-                    <ListItem>
-                        <Accordion>
-                            <AccordionSummary
-                                expandIcon={<DownOutlined />}
-                                aria-controls="panel1-content"
-                                id="panel1-header"
-                            >
-                                <Typography component="span">Step 1</Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                                malesuada lacus ex, sit amet blandit leo lobortis eget.
-                            </AccordionDetails>
-                        </Accordion>
-                    </ListItem>
+                    {instructions.map((instruction, index) => (
+                        <ListItem key={index}>
+                            <Accordion sx={{ width: "100%" }}>
+                                <AccordionSummary
+                                    expandIcon={<DownOutlined />}
+                                    aria-controls={`panel${index}-content`}
+                                    id={`panel${index}-header`}
+                                >
+                                    <Typography component="span">Step {index + 1}</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    {instruction}
+                                </AccordionDetails>
+                            </Accordion>
+                        </ListItem>
+                    ))}
                 </List>
             </Box>
         </Box>

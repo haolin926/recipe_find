@@ -1,0 +1,14 @@
+.searchListImage {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+}
+.imageContainer{
+    width:100px;
+    height:100px;
+    overflow:hidden;
+    margin-left:5%;
+}
+.listContainer {
+    padding:2%;
+}
