@@ -9,11 +9,16 @@ import {Carousel} from "antd";
 import PropTypes from 'prop-types';
 
 const NutritionComponent = ({nutrition}) => {
-    const pieChartData = nutrition.map((nutrient, index) => ({
-        id: index,
-        value: nutrient.amount,
-        label: nutrient.name,
-    }));
+    // if nutrition is undefined or null, set it to an empty array
+    const nutritionList = nutrition ?? [];
+    let pieData;
+
+    if (nutritionList !== []) {
+        pieData = nutritionList.map(nutrition => ({
+            label: nutrition.name,
+            value: parseFloat(nutrition.amount) // Ensure value is a number
+        }));
+    }
     return (
             <Box className="bottomContainerPaper">
                 <AppBar position="static" sx={{width:"100%", borderRadius: "5px", display:"flex", justifyContent:"center", alignItems:"center"}}>
@@ -21,13 +26,14 @@ const NutritionComponent = ({nutrition}) => {
                 </AppBar>
                 <Box sx={{display:"flex", flexDirection:"row", justifyContent:"space-between", height:"100%", gap:"1%", margin:"1%", overflow:"auto"}}>
                     <Paper elevation={3} sx={{width:"48%", height:"80%", margin:"1%"}}>
+                        {nutritionList !== [] && nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
                         <Carousel dots={{className: "greyDots"}} style={{height:"100%"}}>
                             <div>
                                 <div className="carouselItem">
                                 <PieChart
                                     series={[
                                         {
-                                            data: pieChartData,
+                                            data: pieData,
                                             innerRadius: 50,
                                             outerRadius: 100,
                                             paddingAngle: 5,
@@ -50,6 +56,9 @@ const NutritionComponent = ({nutrition}) => {
                                 <h3>4</h3>
                             </div>
                         </Carousel>
+                            ) : (
+                                <h3 style={{textAlign: "center", margin: "auto"}}>No nutrition data available</h3>
+                            )}
                     </Paper>
                     <Paper elevation={3} sx={{width:"48%", height:"80%", display:"flex", justifyContent:"center", margin:"1%", overflow:"auto"}}>
                         <TableContainer>
@@ -57,18 +66,26 @@ const NutritionComponent = ({nutrition}) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>Item</TableCell>
-                                        <TableCell>Quantity</TableCell>
+                                        <TableCell>Amount</TableCell>
                                         <TableCell>Unit</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {nutrition.map((nutrient,) => (
+                                    { nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
+                                        nutritionList.map((nutrition, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{nutrition.name}</TableCell>
+                                                <TableCell>{nutrition.amount}</TableCell>
+                                                <TableCell>{nutrition.unit}</TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : (
                                         <TableRow>
-                                            <TableCell>{nutrient.name}</TableCell>
-                                            <TableCell>{nutrient.amount}</TableCell>
-                                            <TableCell>g</TableCell>
+                                            <TableCell colSpan={3} style={{ textAlign: "center" }}>
+                                                No nutrition data available
+                                            </TableCell>
                                         </TableRow>
-                                    ))}
+                                    )}
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -78,13 +95,5 @@ const NutritionComponent = ({nutrition}) => {
     );
 }
 
-NutritionComponent.propTypes = {
-    nutrition: PropTypes.arrayOf(
-        PropTypes.shape({
-            name: PropTypes.string.isRequired,
-            amount: PropTypes.number.isRequired,
-        })
-    ).isRequired,
-}
 
 export default NutritionComponent;

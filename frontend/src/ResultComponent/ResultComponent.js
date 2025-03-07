@@ -1,24 +1,54 @@
-import React from "react";
+import React, {useContext, useState} from "react";
 import {useLocation} from "react-router-dom";
 import "./ResultComponent.css";
 import Box from "@mui/material/Box";
-import {Button, Paper} from "@mui/material";
-import { Tabs } from "antd";
+import {Button, Dialog, DialogContent, DialogTitle, Paper, useMediaQuery} from "@mui/material";
+import {message, Modal, Tabs} from "antd";
 import InstructionComponent from "./InstructionComponent";
 import TabPane from "antd/es/tabs/TabPane";
 import IngredientComponent from "./IngredientComponent";
 import NutritionComponent from "./NutritionComponent";
+import {AuthContext} from "../AuthContext";
+import axios from "axios";
+import LoginWindowComponent from "../LoginWindowComponent/LoginWindowComponent";
 
 const ResultComponent = () => {
     const location = useLocation();
-    const {item} = location.state;
+    const {recipe} = location.state;
+    const {user} = useContext(AuthContext);
+    const [isLoginModalVisible, setLoginModalVisible] = useState(false);
 
-    if (!item) {
-        return <div>No data found</div>;
+    const handleCancel = () => {
+        setLoginModalVisible(false);
+    };
+
+
+    const {name, image, instructions, ingredients, nutrition} = recipe;
+    const handleAddToFavorites = async () => {
+        if (user != null) {
+            try {
+                const response = await axios.post(
+                    "http://localhost:8080/api/recipe/save",
+                    recipe,
+                    {
+                        params: { userId: user.id },
+                        withCredentials: true,
+                    }
+                );
+                if (response.status === 200) {
+                    console.log("Recipe added to favorites successfully");
+                    message.success("Save recipe to favourite successfully");
+                } else {
+                    console.error("Failed to add recipe to favorites");
+                }
+            } catch (error) {
+                console.log("error occurred when adding to favourite");
+            }
+        } else {
+            message.info("Login Required")
+            setLoginModalVisible(true);
+        }
     }
-
-    const {name, image, instructions, ingredients, nutrition} = item;
-
 
     return (
         <Box sx={{display:"flex", width:"100%", height:"100vh", flexDirection:"column"}}>
@@ -27,7 +57,8 @@ const ResultComponent = () => {
                     <Box sx={{display:"flex", flexDirection:"column", justifyContent:"space-between"}}>
                         <h1>{name}</h1>
                         <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                            <Button variant="contained" size="large" sx={{width:"400px", height:"50px"}}>
+                            <Button variant="contained" size="large" sx={{width:"400px", height:"50px"}}
+                                    onClick={handleAddToFavorites}>
                                 Add Recipe to Favorites
                             </Button>
                             <Button variant="contained" size="large" sx={{ width:"400px", height:"50px"}}>
@@ -58,6 +89,16 @@ const ResultComponent = () => {
                     </Tabs>
                 </Paper>
             </Box>
+
+            <Dialog
+                open={isLoginModalVisible}
+                onClose={handleCancel}
+                centered
+            >
+                <DialogContent sx={{ width: '500px', padding:0 }}>
+                    <LoginWindowComponent />
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 }

@@ -12,6 +12,9 @@ import {ThemeProvider} from "@mui/material";
 import ResponsiveDrawer from "./SideBarComponent/sideBar";
 import SavedRecipeComponent from "./SavedRecipeComponent/SavedRecipeComponent";
 import SearchComponent from "./SearchComponent/SearchComponent";
+import LoginComponent from "./LoginComponent/LoginComponent";
+import SignUpComponent from "./SignUpComponent/SignUpComponent";
+import {AuthProvider} from "./AuthContext";
 const muiTheme = createTheme({
     palette: {
         primary: {
@@ -20,6 +23,19 @@ const muiTheme = createTheme({
             contrastText: '#fff',
         }
     },
+    components: {
+        MuiLink: {
+            styleOverrides: {
+                root: {
+                    color: "black",
+                    textDecorationColor: "black",
+                    "&:hover": {
+                        color: "#e67e22",
+                    },
+                },
+            },
+        }
+    }
 });
 
 function App() {
@@ -31,35 +47,40 @@ function App() {
     };
 
   return (
-      <ConfigProvider
-          theme={{
-              token: {
-                  colorPrimary: "#e67e22",
-              },
-          }}
-      >
-          <ThemeProvider theme={muiTheme}>
-              <Layout style={{height:"100vh"}}>
-                  <Header>
-                      <ResponsiveAppBar toggleDrawer={toggleDrawer}></ResponsiveAppBar>
-                  </Header>
-                  <Layout>
-                      <Router>
-                          <ResponsiveDrawer visible={drawerVisible} toggleDrawer={toggleDrawer}></ResponsiveDrawer>
-                          <Content style={{overflow:"auto"}}>
-                              <Routes>
-                                  <Route path={"/"} element={<HomeComponent/>}/>
-                                  <Route path={"/result"} element={<ResultComponent/>}/>
-                                  <Route path={"/mealplan"} element={<MealPlanComponent/>}/>
-                                  <Route path={"/savedrecipes"} element={<SavedRecipeComponent/>}/>
-                                  <Route path={"/search"} element={<SearchComponent/>}/>
-                              </Routes>
-                          </Content>
-                      </Router>
-                  </Layout>
-              </Layout>
-          </ThemeProvider>
-      </ConfigProvider>
+      <AuthProvider>
+          <Router>
+              <ConfigProvider
+                  theme={{
+                      token: {
+                          colorPrimary: "#e67e22",
+                      },
+                  }}
+              >
+                  <ThemeProvider theme={muiTheme}>
+                      <Layout style={{height:"100vh"}}>
+                          <Header>
+                              <ResponsiveAppBar toggleDrawer={toggleDrawer}></ResponsiveAppBar>
+                          </Header>
+                          <Layout>
+                                  <ResponsiveDrawer visible={drawerVisible} toggleDrawer={toggleDrawer}></ResponsiveDrawer>
+                                  <Content style={{overflow:"auto"}}>
+                                      <Routes>
+                                          <Route path={"/"} element={<HomeComponent/>}/>
+                                          <Route path={"/result"} element={<ResultComponent/>}/>
+                                          <Route path={"/mealplan"} element={<MealPlanComponent/>}/>
+                                          <Route path={"/savedrecipes"} element={<SavedRecipeComponent/>}/>
+                                          <Route path={"/search"} element={<SearchComponent/>}/>
+                                          <Route path={"/login"} element={<LoginComponent/>}/>
+                                          <Route path={"*"} element={<HomeComponent/>}/>
+                                          <Route path={"/signup"} element={<SignUpComponent/>}/>
+                                      </Routes>
+                                  </Content>
+                          </Layout>
+                      </Layout>
+                  </ThemeProvider>
+              </ConfigProvider>
+          </Router>
+      </AuthProvider>
   );
 }
 

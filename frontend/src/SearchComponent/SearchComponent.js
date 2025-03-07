@@ -11,11 +11,13 @@ import {useLocation} from "react-router-dom";
 import RecognitionResultComponent from "./RecognitionResultComponent/RecognitionResultComponent";
 import ResultListComponent from "./ResultListComponent";
 import axios from "axios";
+import {Spin} from "antd";
+
 function SearchComponent () {
 
     const location = useLocation();
     const [value, setValue] = React.useState(location.state?.value || "1");
-    const [contentToDisplay, setContentToDisplay] = React.useState(null);
+    const [contentToDisplay, setContentToDisplay] = React.useState("null");
     const [predictionResult, setPredictionResult] = React.useState(null);
     const [uploadedImage, setUploadedImage] = React.useState(null);
     const [searchResult, setSearchResult] = React.useState(null);
@@ -24,26 +26,47 @@ function SearchComponent () {
         setValue(newValue);
     };
 
-    const handleSearchInput = (data) => {
-        setContentToDisplay("searchResult");
-        setSearchResult(data);
-    }
-
-    const handleImageUpload = ( data, image ) => {
-        setContentToDisplay("predictResult"); // Update the state when image is uploaded
-        setPredictionResult(data);
-        setUploadedImage(image);
-    };
-
     const handleSearchByName = async (name) => {
+        setContentToDisplay("loading");
         try {
             const response = await axios.get(`http://localhost:8080/api/recipe/name?queryName=${name}`);
             console.log(response.data);
-            handleSearchInput(response.data);
+            setSearchResult(response.data);
+            setContentToDisplay("searchResult");
         } catch (error) {
+            setSearchResult(null);
             console.error("Error fetching recipe by name:", error);
+            setContentToDisplay("searchResult");
         }
     }
+
+    const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
+
+        if (file) {
+            setUploadedImage(file);
+            setContentToDisplay("loading");
+
+            try {
+                const formData = new FormData();
+                formData.append("image", file);
+
+                const response = await axios.post("http://localhost:8080/api/recipe/image", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data", // Specify content type for file upload
+                    },
+                });
+                console.log(response.data);
+                setPredictionResult(response.data);
+                setContentToDisplay("predictResult");
+
+            } catch (error) {
+                console.error("error uploading Image");
+                setPredictionResult(null);
+                setContentToDisplay("predictResult");
+            }
+        }
+    };
 
     return (
         <Box className={"bodyBackground"} sx={{display:"flex", alignItems:"center", flexDirection:"column"}}>
@@ -69,9 +92,14 @@ function SearchComponent () {
             </Paper>
 
             <Paper className={"contentContainer"}>
+                {contentToDisplay === 'loading' &&
+                    <Box style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", minHeight:"40vh"}}>
+                        <Spin></Spin>
+                    </Box>
+                }
                 {contentToDisplay === 'searchResult' && <ResultListComponent searchResult={searchResult}/>}
                 {contentToDisplay === 'predictResult' && <RecognitionResultComponent predictions={predictionResult} image={uploadedImage} onSearchByName={handleSearchByName}/>}
-            </Paper>
+                </Paper>
         </Box>
     );
 }

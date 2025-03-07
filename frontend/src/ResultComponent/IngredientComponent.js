@@ -1,21 +1,21 @@
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import {Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
-import React, {useState} from "react";
-import "./ResultComponent.css";
-import {FloatButton} from "antd";
-import {PlusOutlined} from "@ant-design/icons";
+import React, { useState } from "react";
+import { Box, AppBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox } from "@mui/material";
+import { PlusOutlined } from "@ant-design/icons";
+import { FloatButton } from "antd";
 
-const IngredientComponent = (ingredients) => {
+const IngredientComponent = ({ ingredients }) => {
+    const ingredientList = ingredients ?? []; // Ensure ingredients is an array
 
     const [rows, setRows] = useState(
-        ingredients.ingredients.map((ingredient, index) => ({
+        ingredientList.map((ingredient, index) => ({
             id: index,
-            name: ingredient.name,
-            amount: ingredient.amount,
+            name: ingredient?.name ?? "Unknown Ingredient", // Fallback if name is undefined
+            amount: ingredient?.amount ?? "N/A", // Fallback if amount is undefined
             selected: false,
+            unit: ingredient?.unit ?? ""
         }))
     );
+
     const handleCheckboxChange = (id) => {
         setRows((prevRows) =>
             prevRows.map((row) =>
@@ -31,15 +31,16 @@ const IngredientComponent = (ingredients) => {
         );
     };
 
-    const allSelected = rows.every((row) => row.selected);
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+
     return (
         <Box className="bottomContainerPaper">
-            <Box sx={{width:"100%"}}>
-                <AppBar position="static" sx={{width:"100%", borderRadius: "5px", display:"flex", justifyContent:"center", alignItems:"center"}}>
+            <Box sx={{ width: "100%" }}>
+                <AppBar position="static" sx={{ width: "100%", borderRadius: "5px", display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <h1>Ingredient Summary</h1>
                 </AppBar>
             </Box>
-            <TableContainer component={Box} sx={{height:"100%", overflow:"auto"}}>
+            <TableContainer component={Box} sx={{ height: "100%", overflow: "auto" }}>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -47,6 +48,7 @@ const IngredientComponent = (ingredients) => {
                                 <Checkbox
                                     checked={allSelected}
                                     onChange={handleSelectAll}
+                                    disabled={rows.length === 0} // Disable if no ingredients
                                 />
                             </TableCell>
                             <TableCell>Ingredient</TableCell>
@@ -54,29 +56,38 @@ const IngredientComponent = (ingredients) => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row) => (
-                            <TableRow key={row.id}>
-                                <TableCell padding="checkbox">
-                                    <Checkbox
-                                        checked={row.selected}
-                                        onChange={() => handleCheckboxChange(row.id)}
-                                    />
+                        {rows.length > 0 ? (
+                            rows.map((row) => (
+                                <TableRow key={row.id}>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                            checked={row.selected}
+                                            onChange={() => handleCheckboxChange(row.id)}
+                                        />
+                                    </TableCell>
+                                    <TableCell>{row.name}</TableCell>
+                                    <TableCell>{`${row.amount} ${row.unit}`}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={3} align="center">
+                                    No ingredients available
                                 </TableCell>
-                                <TableCell>{row.name}</TableCell>
-                                <TableCell>{row.amount}</TableCell>
                             </TableRow>
-                        ))}
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
             <FloatButton
-                style={{position:"absolute", color:"white", backgroundColor:"#e67e22", bottom:"10px", right:"10px"}}
+                style={{ position: "absolute", color: "white", backgroundColor: "#e67e22", bottom: "10px", right: "10px" }}
                 tooltip={<div>Add Selected Ingredient To Shopping List</div>}
-                icon={<PlusOutlined/>}
+                icon={<PlusOutlined />}
                 type={"primary"}
-                ></FloatButton>
+                disabled={rows.length === 0} // Disable if no ingredients
+            />
         </Box>
-    )
-}
+    );
+};
 
 export default IngredientComponent;

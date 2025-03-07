@@ -25,63 +25,6 @@ class HomeComponent extends Component {
         this.props.navigate("/search", {state: {value:"2"}});
     }
 
-
-    uploadImage = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const previewURL = URL.createObjectURL(file);
-            const formData = new FormData();
-            formData.append("image", file);
-            this.setState({
-                image: formData,
-                previewURL: previewURL,
-                loading: true
-            });
-
-            try {
-                fetch("http://localhost:8080/api/recipe/image", {
-                    method: "POST",
-                    body: formData
-                }).then(response => {
-                    if (!response.ok) {
-                        this.setState({loading: false});
-                        throw new Error("Error uploading image");
-                    }
-                    return response.text();
-                }).then(data => {
-                    this.setState({
-                        loading: false,
-                        dialogOpen: true,
-                        predictName: data
-                    });
-                }).catch(error => {
-                    this.setState({loading: false});
-                    console.error("Error uploading image: ", error);
-                });
-            } catch (error) {
-                this.setState({loading: false});
-                console.error("Error uploading image: ", error);
-            }
-
-        }
-    }
-
-    inputText = () => {
-        const name = document.getElementById("nameUpload").value;
-        if(name === "" || name === null) {
-            alert("Please input a name");
-            return
-        }
-        this.setState({
-            name: name,
-            loading: true
-        });
-
-        this.getRecipe(name).catch(() => {
-            this.setState({loading: false});
-        });
-    }
-
     getRecipe = async (name) => {
         try {
             const response = await fetch(`http://localhost:8080/api/recipe/name?queryName=${encodeURIComponent(name)}`, {
