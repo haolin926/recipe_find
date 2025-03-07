@@ -7,16 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RecipeDTO {
-    private String id;
+    private Integer id;
+
+    private Integer recipeApiId;
 
     @JsonProperty("name")
     private String name;
@@ -28,9 +28,8 @@ public class RecipeDTO {
     private List<String> instructions = new ArrayList<>();
 
     @JsonProperty("ingredients")
-    private List<Ingredient> ingredients = new ArrayList<>();
+    private List<IngredientDTO> ingredientDTOS = new ArrayList<>();
 
     @JsonProperty("nutrition")
-    private List<Nutrition> nutrition = new ArrayList<>();
-
+    private List<NutritionDTO> nutritionDTOS = new ArrayList<>();
 }

@@ -10,16 +10,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Ingredient {
+public class IngredientDTO {
     @JsonProperty("id")
     private int id;
     @JsonProperty("name")
     private String name;
-
+    @JsonProperty("amount")
     private String amount;
+    @JsonProperty("unit")
+    private String unit;
 
-    public Ingredient(String name, String amountUnit) {
+    public IngredientDTO(String name, String amount, String unit) {
         this.name = name;
-        this.amount = amountUnit;
+        this.amount = amount;
+        this.unit = unit;
     }
 }
