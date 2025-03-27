@@ -75,7 +75,7 @@ def train():
     model_checkpoint = keras.callbacks.ModelCheckpoint('mobilenet_v3_large_checkpoint.keras',monitor='val_accuracy',verbose=1,save_best_only=True)
 
     # Train the model
-    history = model.fit(
+    model.fit(
         train_generator,
         validation_data=validation_generator,
         epochs=20,
@@ -92,7 +92,7 @@ def load_trained_model():
     print(f'Validation accuracy: {accuracy:.4f}')
     print(f'Validation loss: {loss:.4f}')
 
-def showData():
+def show_data():
     x, y = next(train_generator)
     fig, ax = plt.subplots(nrows=5, ncols=5, figsize=(15,15))
 
@@ -104,5 +104,5 @@ def showData():
             ax[i][j].set_yticks([])
     
     fig.show()
-    wait = input("PRESS ENTER TO CONTINUE.")
+    input("PRESS ENTER TO CONTINUE.")
 train()
