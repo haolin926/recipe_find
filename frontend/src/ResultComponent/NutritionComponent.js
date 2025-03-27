@@ -6,13 +6,14 @@ import React from "react";
 import "./ResultComponent.css";
 import "./NutritionComponent.css";
 import {Carousel} from "antd";
+import PropTypes from "prop-types";
 
 const NutritionComponent = ({nutrition}) => {
     // if nutrition is undefined or null, set it to an empty array
     const nutritionList = nutrition ?? [];
     let pieData;
 
-    if (nutritionList !== []) {
+    if (nutritionList.length > 0) {
         pieData = nutritionList.map(nutrition => ({
             label: nutrition.name,
             value: parseFloat(nutrition.amount) // Ensure value is a number
@@ -27,7 +28,7 @@ const NutritionComponent = ({nutrition}) => {
                 </Box>
                 <Box className={"resultInfoContainer nutritionPaperContainer"} >
                     <Paper elevation={3} className={"nutritionPaper"}>
-                        {nutritionList !== [] && nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
+                        {nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
                         <Carousel dots={{className: "greyDots carouselDots"}} style={{height:"100%"}}>
                             <div>
                                 <div className="carouselItem">
@@ -75,7 +76,7 @@ const NutritionComponent = ({nutrition}) => {
                                 <TableBody>
                                     { nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
                                         nutritionList.map((nutrition, index) => (
-                                            <TableRow key={index}>
+                                            <TableRow key={nutrition.name}>
                                                 <TableCell>{nutrition.name}</TableCell>
                                                 <TableCell>{nutrition.amount}</TableCell>
                                                 <TableCell>{nutrition.unit}</TableCell>
@@ -96,6 +97,16 @@ const NutritionComponent = ({nutrition}) => {
             </Box>
     );
 }
+
+NutritionComponent.propTypes = {
+    nutrition: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            amount: PropTypes.string.isRequired,
+            unit: PropTypes.string
+        })
+    ).isRequired
+};
 
 
 export default NutritionComponent;

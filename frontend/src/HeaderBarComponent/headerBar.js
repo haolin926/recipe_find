@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import {useNavigate} from 'react-router-dom';
 import {AuthContext} from "../AuthContext";
 import {Avatar, Dropdown, message} from "antd";
+import PropTypes from "prop-types";
 
 
 function ResponsiveAppBar({toggleDrawer}) {
@@ -66,15 +67,13 @@ function ResponsiveAppBar({toggleDrawer}) {
                         </Box>
                         <Box sx={{marginRight:"10px"}}>
                         {user != null ? (
-                            <>
-                                <Dropdown menu={{items}} trigger={["click"]} overlayStyle={{ zIndex: 1301 }}>
-                                    <Avatar
-                                        src={user.userPhoto}
-                                        icon={!user.userPhoto && <UserOutlined/>}
-                                        style={{ cursor: "pointer", marginBottom: 10 }}
-                                    />
-                                </Dropdown>
-                            </>
+                            <Dropdown menu={{items}} trigger={["click"]} overlayStyle={{ zIndex: 1301 }}>
+                                <Avatar
+                                    src={user.userPhoto}
+                                    icon={!user.userPhoto && <UserOutlined/>}
+                                    style={{ cursor: "pointer", marginBottom: 10 }}
+                                />
+                            </Dropdown>
                             ):(
                                 <>
                                     <Button color="inherit" onClick={handleRegisterClick}>Sign up</Button>
@@ -88,4 +87,8 @@ function ResponsiveAppBar({toggleDrawer}) {
         </Box>
     );
 }
+
+ResponsiveAppBar.propTypes = {
+    toggleDrawer: PropTypes.func.isRequired,
+};
 export default ResponsiveAppBar;

@@ -3,6 +3,7 @@ import { Box, AppBar, Table, TableBody, TableCell, TableContainer, TableHead, Ta
 import { PlusOutlined } from "@ant-design/icons";
 import { FloatButton } from "antd";
 import "./IngredientComponent.css";
+import PropTypes from "prop-types";
 
 const IngredientComponent = ({ ingredients, limitHeight }) => {
     const ingredientList = useMemo(() => ingredients ?? [], [ingredients]); // Ensure ingredients is an array
@@ -96,6 +97,11 @@ const IngredientComponent = ({ ingredients, limitHeight }) => {
             </Box>
         </Box>
     );
+};
+
+IngredientComponent.propTypes = {
+    ingredients: PropTypes.array.isRequired,
+    limitHeight: PropTypes.bool
 };
 
 export default IngredientComponent;

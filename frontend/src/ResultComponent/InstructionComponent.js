@@ -28,7 +28,7 @@ const ResultComponent = ({instructions}) => {
                 >
                     {instructions.map((instruction, index) => (
                         <Step
-                            key={index}
+                            key={instruction}
                             title={`Step ${index + 1}`}
                             description={<Typography>{instruction}</Typography>}
                         />

@@ -1,6 +1,7 @@
-import {createContext, useEffect, useState} from "react";
+import {createContext, useEffect, useMemo, useState} from "react";
 import axios from "axios";
 import {message} from "antd";
+import PropTypes from "prop-types";
 
 export const AuthContext = createContext();
 
@@ -128,9 +129,22 @@ export const AuthProvider = ({children}) => {
         }
     };
 
+    const authContextValue = useMemo(() => ({
+        user,
+        login,
+        logout,
+        register,
+        loading,
+        updateUser,
+        updatePassword
+    }), [user, loading]);
+
     return (
-        <AuthContext.Provider value={{user, login, logout, register, loading, updateUser, updatePassword}}>
+        <AuthContext.Provider value={authContextValue}>
             {children}
         </AuthContext.Provider>
     );
 }
+AuthProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};

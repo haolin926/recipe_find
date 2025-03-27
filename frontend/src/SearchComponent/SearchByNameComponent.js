@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import "./SearchComponent.css";
 import Box from "@mui/material/Box";
 import './SearchByNameComponent.css';
+import PropTypes from "prop-types";
 
 const SearchByNameComponent = ({onSearchByName}) => {
 
@@ -30,6 +31,10 @@ const SearchByNameComponent = ({onSearchByName}) => {
                 <Button className="customButton" type="text" size="large" onClick={handleSubmit}>Submit</Button>
             </Box>
     );
+};
+
+SearchByNameComponent.PropTypes = {
+    onSearchByName: PropTypes.func.isRequired
 };
 
 export default SearchByNameComponent;

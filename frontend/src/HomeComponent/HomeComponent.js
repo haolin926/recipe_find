@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import "./HomeComponent.css";
+import PropTypes from "prop-types";
 class HomeComponent extends Component {
     constructor(props) {
         super(props);
@@ -47,5 +48,9 @@ class HomeComponent extends Component {
         );
     }
 }
+
+HomeComponent.propTypes = {
+    navigate: PropTypes.func.isRequired,
+};
 
 export default withRouter(HomeComponent);

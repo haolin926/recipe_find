@@ -21,8 +21,8 @@ const ResultComponent = () => {
     const {recipeId} = location.state;
     const {user} = useContext(AuthContext);
     const navigate = useNavigate();
-    const [isLoginModalVisible, setLoginModalVisible] = useState(false);
-    const [isAddToMealPlanVisible, setAddToMealPlanVisible] = useState(false);
+    const [loginModalVisible, setLoginModalVisible] = useState(false);
+    const [addToMealPlanVisible, setAddToMealPlanVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(dayjs());
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -55,18 +55,21 @@ const ResultComponent = () => {
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-            const newFile = {
-                uid: file.uid,
-                name: file.name,
-                url: e.target.result, // Store as base64
-                file,
-            };
-
-            setFileList((prev) => [...prev.filter((f) => f.uid !== file.uid), newFile]);
-        };
+        reader.onload = (e) => handleFileRead(e, file);
         reader.readAsDataURL(file);
-        return false; // Prevent auto-upload to server
+
+        return true; // Prevent auto-upload to server
+    };
+
+    const handleFileRead = (e, file) => {
+        const newFile = {
+            uid: file.uid,
+            name: file.name,
+            url: e.target.result, // Store as base64
+            file,
+        };
+
+        setFileList((prev) => [...prev.filter((f) => f.uid !== file.uid), newFile]);
     };
 
 
@@ -397,7 +400,7 @@ const ResultComponent = () => {
                                     <p>{item.comment}</p>
                                     {item.images.map((image, index) => (
                                         <Image
-                                            key={index}
+                                            key={`${image}-${index}`}
                                             src={`data:image/jpeg;base64,${image}`}
                                             alt={`comment-image-${index}`}
                                             style={{ width: 100, height: 100, objectFit: "cover", margin: "5px" }}
@@ -437,7 +440,7 @@ const ResultComponent = () => {
 
                             <div style={{ display: "flex", gap: "10px", margin: "10px 0", flexWrap: "wrap" }}>
                                 {fileList.map((img, index) => (
-                                    <div key={index} style={{ textAlign: "center" }}>
+                                    <div key={`${img}-${index}`} style={{ textAlign: "center" }}>
                                         <img
                                             src={img.url}
                                             alt={`upload-preview-${index}`}
@@ -453,7 +456,7 @@ const ResultComponent = () => {
                 </Paper>
             </Box>
             <Dialog
-                open={isLoginModalVisible}
+                open={loginModalVisible}
                 onClose={handleLoginModalCancel}
                 centered
             >
@@ -463,7 +466,7 @@ const ResultComponent = () => {
             </Dialog>
 
             <Dialog
-                open={isAddToMealPlanVisible}
+                open={addToMealPlanVisible}
                 onClose={handleMealPlanModalCancel}
                 centered
             >

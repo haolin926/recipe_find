@@ -30,9 +30,9 @@ import "./MealPlanComponent.css";
 
 export default function MealPlanComponent() {
 
-    const [selectedDate, handleDateChange] = useState(() => dayjs());
+    const [selectedDate, setSelectedDate] = useState(() => dayjs());
     const { user } = useContext(AuthContext);
-    const [mealplan, setMealPlan] = useState([]);
+    const [MealPlan, setMealPlan] = useState([]);
     const [weeklySummary, setWeeklySummary] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const navigate = useNavigate();
@@ -129,7 +129,7 @@ export default function MealPlanComponent() {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                         value={selectedDate}
-                        onChange={(newValue) => handleDateChange(newValue)}
+                        onChange={(newValue) => setSelectedDate(newValue)}
                     />
                 </LocalizationProvider>
                 <Button variant="contained">
@@ -150,9 +150,9 @@ export default function MealPlanComponent() {
                     </Box>
                     <Paper className={"savedRecipePaper"}>
                         <List>
-                            {(mealplan.recipeDTOList || []).map((recipe, index) => (
+                            {(MealPlan.recipeDTOList || []).map((recipe, index) => (
                                 <ListItem key={recipe.recipeId || index} secondaryAction={
-                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(mealplan.id, recipe.id)}>
+                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(MealPlan.id, recipe.id)}>
                                         <DeleteOutlined />
                                     </IconButton>
                                 }>
@@ -176,12 +176,12 @@ export default function MealPlanComponent() {
 
                 <Box className={"mealPlanInfoContainer"}>
                     <Paper className={"mealPlanIngredientPaper"}>
-                        <IngredientComponent ingredients={mealplan.ingredientDTOList} limitHeight={true}/>
+                        <IngredientComponent ingredients={MealPlan.ingredientDTOList} limitHeight={true}/>
                     </Paper>
                 </Box>
             </Box>
             <Paper sx={{width:"100%", marginTop:"20px"}}>
-                <NutritionComponent nutrition={mealplan.nutritionDTOList}/>
+                <NutritionComponent nutrition={MealPlan.nutritionDTOList}/>
             </Paper>
 
             <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="md">
@@ -192,7 +192,7 @@ export default function MealPlanComponent() {
                             <h2>Ingredients</h2>
                             <List>
                                 {weeklySummary.ingredientDTOList.map((ingredient, index) => (
-                                    <ListItem key={index}>
+                                    <ListItem key={`${ingredient.name}-${ingredient.unit}`}>
                                         <ListItemText primary={ingredient.name} secondary={`${ingredient.amount} ${ingredient.unit}`} />
                                     </ListItem>
                                 ))}
@@ -200,7 +200,7 @@ export default function MealPlanComponent() {
                             <h2>Nutrition</h2>
                             <List>
                                 {weeklySummary.nutritionDTOList.map((nutrition, index) => (
-                                    <ListItem key={index}>
+                                    <ListItem key={`${nutrition.name}-${nutrition.unit}`}>
                                         <ListItemText primary={nutrition.name} secondary={`${nutrition.amount} ${nutrition.unit}`} />
                                     </ListItem>
                                 ))}

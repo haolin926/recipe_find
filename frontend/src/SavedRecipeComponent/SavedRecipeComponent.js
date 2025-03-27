@@ -87,16 +87,25 @@ function SavedRecipeComponent () {
             <Space wrap size="large" className={"cardContainer"}>
                 {recipes.map((recipe) => (
                     <Card
+                        key={recipe.id}
                         hoverable
                         className={"savedRecipeCard"}
                         cover={
                         <div className={"cardImageContainer"}>
-                            <img className="cardImage" alt="example" src={recipe.image} onClick={() => handleImageClick(recipe)} />
+                            <div role="button" tabIndex={0} onClick={() => handleImageClick(recipe)}
+                                 onKeyDown={(e) => {
+                                     if (e.key === 'Enter' || e.key === ' ') {
+                                         handleImageClick(recipe);
+                                     }
+                                 }}
+                                 aria-label={`Click to view details of recipe: ${recipe.name}`}>
+                                <img className="cardImage" alt={`savedRecipeImage-${recipe.name}`} src={recipe.image} />
+                            </div>
                         </div>
                         }
                         actions={[
-                            <EditOutlined onClick={() => handleImageClick(recipe)}></EditOutlined>,
-                            <DeleteOutlined onClick ={() => deleteSavedRecipe(recipe)}></DeleteOutlined>
+                            <EditOutlined key={`edit-${recipe.id}`} onClick={() => handleImageClick(recipe)}></EditOutlined>,
+                            <DeleteOutlined key={`delete-${recipe.id}`} onClick ={() => deleteSavedRecipe(recipe)}></DeleteOutlined>
                         ]}
                     >
                         <Meta

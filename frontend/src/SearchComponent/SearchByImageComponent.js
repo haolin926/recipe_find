@@ -1,6 +1,7 @@
 import {Button, styled} from "@mui/material";
 import React from "react";
 import Box from "@mui/material/Box";
+import PropTypes from "prop-types";
 
 const SearchByImageComponent = ({ onImageUpload }) => {
 
@@ -36,6 +37,10 @@ const SearchByImageComponent = ({ onImageUpload }) => {
             </Button>
         </Box>
     );
+};
+
+SearchByImageComponent.propTypes = {
+    onImageUpload: PropTypes.func.isRequired
 };
 
 export default SearchByImageComponent;

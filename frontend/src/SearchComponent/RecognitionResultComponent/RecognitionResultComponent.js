@@ -4,6 +4,7 @@ import {Link, Paper} from "@mui/material";
 import {Button, Tag, Typography, Flex, Progress} from 'antd'
 import React from 'react';
 import AppBar from "@mui/material/AppBar";
+import PropTypes from "prop-types";
 
 function RecognitionResultComponent ( {predictions, image, onSearchByName, onSearchByIngredient}) {
     const [selectedTags, setSelectedTags] = React.useState([]);
@@ -36,7 +37,7 @@ function RecognitionResultComponent ( {predictions, image, onSearchByName, onSea
                     <Flex className={"nameAndProbability"} vertical>
                         {predictions && predictions.predictName.length > 0 ? (
                             predictions.predictName.map((prediction, index) => (
-                                <div className={"predict_probability_container"} key={index}>
+                                <div className={"predict_probability_container"} key={`prediction-${prediction.name}-${prediction.probability}`}>
                                     <Link underline="none" className="predictionText" onClick={() => handleSearchByName(prediction.name)}>{prediction.name}</Link>
                                     <Progress
                                         percent={(prediction.probability * 100).toFixed(2)}
@@ -85,5 +86,20 @@ function RecognitionResultComponent ( {predictions, image, onSearchByName, onSea
         </Box>
     );
 }
+
+RecognitionResultComponent.propTypes = {
+    predictions: PropTypes.shape({
+        predictName: PropTypes.arrayOf(
+            PropTypes.shape({
+                name: PropTypes.string.isRequired,
+                probability: PropTypes.number.isRequired
+            })
+        ).isRequired,
+        detectedIngredients: PropTypes.arrayOf(PropTypes.string).isRequired
+    }).isRequired,
+    image: PropTypes.instanceOf(File).isRequired,
+    onSearchByName: PropTypes.func.isRequired,
+    onSearchByIngredient: PropTypes.func.isRequired
+};
 
 export default RecognitionResultComponent;

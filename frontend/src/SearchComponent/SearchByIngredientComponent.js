@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import {Input, Tag} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
+import PropTypes from "prop-types";
 
 const SearchByIngredientComponent = ({onSearchByIngredients}) => {
 
@@ -77,6 +78,10 @@ const SearchByIngredientComponent = ({onSearchByIngredients}) => {
             <Button className="customButton" type="text" size="large" onClick={handleSearch}>Submit</Button>
         </Box>
     );
+};
+
+SearchByIngredientComponent.propTypes = {
+    onSearchByIngredients: PropTypes.func.isRequired
 };
 
 export default SearchByIngredientComponent;

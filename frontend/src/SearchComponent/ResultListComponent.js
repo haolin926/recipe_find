@@ -4,6 +4,7 @@ import "./ResultListComponent.css";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
+import PropTypes from "prop-types";
 
 
 const ResultListComponent = ({ searchResult }) => {
@@ -83,7 +84,7 @@ const ResultListComponent = ({ searchResult }) => {
                                                     <div id="ingredientInfoDiv">
                                                         {hasUsedIngredients && (
                                                             <Popover
-                                                                content={<ul>{item.usedIngredients.map((ing, index) => <li key={index}>{ing}</li>)}</ul>}
+                                                                content={<ul>{item.usedIngredients.map((ing, index) => <li key={`${ing}-${index}`}>{ing}</li>)}</ul>}
                                                                 title="Ingredients Used"
                                                             >
                                                                 <Button variant="contained">Ingredients Used</Button>
@@ -106,5 +107,16 @@ const ResultListComponent = ({ searchResult }) => {
             </Box>
         </Box>
     );
+};
+
+ResultListComponent.propTypes = {
+    searchResult: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+            name: PropTypes.string.isRequired,
+            image: PropTypes.string,
+            description: PropTypes.string,
+        })
+    ).isRequired,
 };
 export default ResultListComponent;

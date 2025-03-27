@@ -2,6 +2,7 @@ import * as React from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import {Drawer, Menu} from "antd";
 import "./sideBar.css"
+import PropTypes from "prop-types";
 
 function ResponsiveDrawer({visible, toggleDrawer}) {
     const navigate = useNavigate();
@@ -28,6 +29,11 @@ function ResponsiveDrawer({visible, toggleDrawer}) {
             />
         </Drawer>
     );
+}
+
+ResponsiveDrawer.propTypes = {
+    visible: PropTypes.bool.isRequired,
+    toggleDrawer: PropTypes.func.isRequired
 }
 
 export default ResponsiveDrawer;
