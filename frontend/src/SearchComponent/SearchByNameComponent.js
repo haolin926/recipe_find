@@ -33,7 +33,7 @@ const SearchByNameComponent = ({onSearchByName}) => {
     );
 };
 
-SearchByNameComponent.PropTypes = {
+SearchByNameComponent.propTypes = {
     onSearchByName: PropTypes.func.isRequired
 };
 

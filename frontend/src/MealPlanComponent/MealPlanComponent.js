@@ -192,7 +192,7 @@ export default function MealPlanComponent() {
                             <h2>Ingredients</h2>
                             <List>
                                 {weeklySummary.ingredientDTOList.map((ingredient, index) => (
-                                    <ListItem key={`${ingredient.name}-${ingredient.unit}`}>
+                                    <ListItem key={`${ingredient.name}-${index}`}>
                                         <ListItemText primary={ingredient.name} secondary={`${ingredient.amount} ${ingredient.unit}`} />
                                     </ListItem>
                                 ))}
@@ -200,7 +200,7 @@ export default function MealPlanComponent() {
                             <h2>Nutrition</h2>
                             <List>
                                 {weeklySummary.nutritionDTOList.map((nutrition, index) => (
-                                    <ListItem key={`${nutrition.name}-${nutrition.unit}`}>
+                                    <ListItem key={`${nutrition.name}-${index}`}>
                                         <ListItemText primary={nutrition.name} secondary={`${nutrition.amount} ${nutrition.unit}`} />
                                     </ListItem>
                                 ))}

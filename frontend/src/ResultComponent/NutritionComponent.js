@@ -76,7 +76,7 @@ const NutritionComponent = ({nutrition}) => {
                                 <TableBody>
                                     { nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
                                         nutritionList.map((nutrition, index) => (
-                                            <TableRow key={nutrition.name}>
+                                            <TableRow key={`${nutrition.name}-${index}`}>
                                                 <TableCell>{nutrition.name}</TableCell>
                                                 <TableCell>{nutrition.amount}</TableCell>
                                                 <TableCell>{nutrition.unit}</TableCell>

@@ -37,7 +37,7 @@ function RecognitionResultComponent ( {predictions, image, onSearchByName, onSea
                     <Flex className={"nameAndProbability"} vertical>
                         {predictions && predictions.predictName.length > 0 ? (
                             predictions.predictName.map((prediction, index) => (
-                                <div className={"predict_probability_container"} key={`prediction-${prediction.name}-${prediction.probability}`}>
+                                <div className={"predict_probability_container"} key={`prediction-${prediction.name}-${index}`}>
                                     <Link underline="none" className="predictionText" onClick={() => handleSearchByName(prediction.name)}>{prediction.name}</Link>
                                     <Progress
                                         percent={(prediction.probability * 100).toFixed(2)}
