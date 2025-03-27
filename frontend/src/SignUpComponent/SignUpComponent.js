@@ -4,6 +4,7 @@ import AppBar from "@mui/material/AppBar";
 import {Button, Form, Input, message} from "antd";
 import React, {useContext} from "react";
 import {AuthContext} from "../AuthContext";
+import "./SignUpComponent.css";
 
 function SignUpComponent () {
 
@@ -34,7 +35,7 @@ function SignUpComponent () {
 
     return (
         <Box className={"bodyBackground"} sx={{display:"flex", justifyContent:"center", lexDirection:"column"}}>
-            <Paper sx={{display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", width:"40%", height:"50%", marginTop:"10%"}}>
+            <Paper className={"signUpPaper"}>
                 <AppBar className={"commonHeader"} position={"static"}>
                     <h2>Sign Up</h2>
                 </AppBar>

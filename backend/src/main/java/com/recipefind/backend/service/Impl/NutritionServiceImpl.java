@@ -13,7 +13,7 @@ public class NutritionServiceImpl implements NutritionService {
     private final NutritionRepository nutritionRepository;
 
     @Override
-    public NutritionEntity saveOrUpdateNutrition(String nutritionName) {
+    public NutritionEntity findOrSaveNutrition(String nutritionName) {
         NutritionEntity nutrition = nutritionRepository.findByNutritionName(nutritionName);
         if (nutrition == null) {
             nutrition = new NutritionEntity();

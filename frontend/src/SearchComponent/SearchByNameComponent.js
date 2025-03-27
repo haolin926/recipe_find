@@ -19,14 +19,11 @@ const SearchByNameComponent = ({onSearchByName}) => {
     return (
             <Box className={"searchBarContainer"}>
                 <TextField
+                    id={"userInputNameField"}
                     label="Enter Recipe Name"
                     variant="filled"
                     className="customTextField"
-                    sx={{
-                        width: "30%",
-                        color:"#e67e22",
-                        backgroundColor:"white",
-                    }}
+
                     value={recipeName}
                     onChange={handleInputChange}
                 />

@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Box from "@mui/material/Box";
 import {
-    Button,
+    Button, Dialog, DialogActions, DialogContent, DialogTitle,
     IconButton,
     ListItem,
     ListItemAvatar,
@@ -19,16 +19,113 @@ import {DeleteOutlined} from "@ant-design/icons";
 import "../ResultComponent/ResultComponent.css";
 import IngredientComponent from "../ResultComponent/IngredientComponent";
 import NutritionComponent from "../ResultComponent/NutritionComponent";
+import {useContext, useEffect, useState} from "react";
+import {AuthContext} from "../AuthContext";
+import {useNavigate} from "react-router-dom";
+import {Avatar, message} from "antd";
+import axios from "axios";
+import "./MealPlanComponent.css";
 
 
 
 export default function MealPlanComponent() {
 
-    const [selectedDate, handleDateChange] = React.useState(dayjs('2025-01-01'));
+    const [selectedDate, handleDateChange] = useState(() => dayjs());
+    const { user } = useContext(AuthContext);
+    const [mealplan, setMealPlan] = useState([]);
+    const [weeklySummary, setWeeklySummary] = useState(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            // Call fetchSavedRecipe only if user is logged in
+            fetchMealPlanForCurrentDate();
+        } else {
+            message.info("You must login first to visit meal plan");
+            navigate("/login");
+        }
+    }, [user, selectedDate]);
+
+    const fetchMealPlanForCurrentDate= async () => {
+        if (user == null) {
+            message.info("You must login first to visit meal plan");
+            navigate("/login")
+            return;
+        }
+        try {
+            const formattedDate = selectedDate.format("YYYY-MM-DD");
+            const response = await axios.get(
+                "http://localhost:8080/api/mealplan/ondate",
+                {
+                    params :{userId : user.id, date: formattedDate},
+                    withCredentials: true
+                }
+            );
+            if (response.status === 200) {
+                console.log(response.data);
+                setMealPlan(response.data);
+            } else {
+                console.error('Failed to fetch meal plan:', response.statusText);
+                setMealPlan([]);
+            }
+        } catch (error) {
+            console.error('Error fetching meal plan:', error);
+            setMealPlan([]);
+        }
+    }
+
+    const getWeeklySummary = async () => {
+        try {
+            const formattedDate = selectedDate.format("YYYY-MM-DD");
+            const response = await axios.get(
+                "http://localhost:8080/api/mealplan/getWeekSummary",
+                {
+                    params :{userId: user.id, date: formattedDate},
+                    withCredentials: true
+                }
+            );
+            if (response.status === 200) {
+                console.log(response.data);
+                setWeeklySummary(response.data);
+                setDialogOpen(true);
+            } else {
+                console.error('Failed to fetch meal plan:', response.statusText);
+            }
+        } catch (error) {
+            console.error("Failed to fetch weekly summary");
+        }
+    }
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+    };
+
+    const handleDelete = async (mealplanId, recipeId) => {
+        try {
+            const response = await axios.delete("http://localhost:8080/api/mealplan/remove", {
+                params: { mealPlanId: mealplanId, recipeId: recipeId },
+                withCredentials: true // If authentication is needed
+            });
+
+            if (response.status === 200) {
+                message.success("Recipe successfully deleted from meal plan");
+                await fetchMealPlanForCurrentDate();
+            } else {
+                message.error("Failed to delete recipe from meal plan");
+            }
+        } catch (error) {
+            console.error("Error deleting recipe from meal plan:", error);
+            message.error("Failed to delete recipe from meal plan");
+        }
+    };
+
+    function handleClick(recipe) {
+        navigate('/result', {state: {recipeId: recipe.recipeApiId}});
+    }
 
     return (
-        <Box sx={{margin:"1%", overflow:"auto"}}>
-            <Box sx={{display:"flex", width:"98%", height:"100px", alignItems:"center", justifyContent:"space-between"}}>
+        <Box className={"mealPlanBody"}>
+            <Box className={"mealPlanTopContainer"}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                         value={selectedDate}
@@ -39,98 +136,85 @@ export default function MealPlanComponent() {
                     Add New Recipe
                 </Button>
             </Box>
-            <Box>
-                <Button variant="outlined">
+            <Box className={"showWeeklySummaryButtonContainer"}>
+                <Button variant="outlined" onClick={getWeeklySummary}>
                     Show Weekly Summary
                 </Button>
             </Box>
-            <Box sx={{display:"flex", justifyContent:"space-between", width:"100%", height:"500px", marginTop:"20px"}}>
-                <Box className="bottomContainerPaper" sx={{width:"49%"}}>
-                    <Box sx={{width:"100%"}}>
-                        <AppBar position="static" sx={{width:"100%", borderRadius: "5px", display:"flex", justifyContent:"center", alignItems:"center"}}>
+            <Box className={"plannedRecipeAndIngredient"}>
+                <Box className="mealPlanInfoContainer">
+                    <Box>
+                        <AppBar position="static" className={"commonHeader"}>
                             <h1>Saved Recipes</h1>
                         </AppBar>
                     </Box>
-                    <Paper sx={{height:"100%", overflow:"auto"}}>
+                    <Paper className={"savedRecipePaper"}>
                         <List>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
+                            {(mealplan.recipeDTOList || []).map((recipe, index) => (
+                                <ListItem key={recipe.recipeId || index} secondaryAction={
+                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(mealplan.id, recipe.id)}>
                                         <DeleteOutlined />
-                                    </IconButton>}>
-                                <ListItemButton>
-                                    <ListItemAvatar>
-                                    </ListItemAvatar>
-                                    <ListItemText>
-                                        <h3>Recipe name</h3>
-                                    </ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <DeleteOutlined />
-                                    </IconButton>}>
-                                <ListItemButton>
-                                    <ListItemAvatar>
-                                    </ListItemAvatar>
-                                    <ListItemText>
-                                        <h3>Recipe name</h3>
-                                    </ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <DeleteOutlined />
-                                    </IconButton>}>
-                                <ListItemButton>
-                                    <ListItemAvatar>
-                                    </ListItemAvatar>
-                                    <ListItemText>
-                                        <h3>Recipe name</h3>
-                                    </ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <DeleteOutlined />
-                                    </IconButton>}>
-                                <ListItemButton>
-                                    <ListItemAvatar>
-                                    </ListItemAvatar>
-                                    <ListItemText>
-                                        <h3>Recipe name</h3>
-                                    </ListItemText>
-                                </ListItemButton>
-                            </ListItem>
-                            <ListItem
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="delete">
-                                        <DeleteOutlined />
-                                    </IconButton>}>
-                                <ListItemButton>
-                                    <ListItemAvatar>
-                                    </ListItemAvatar>
-                                    <ListItemText>
-                                        <h3>Recipe name</h3>
-                                    </ListItemText>
-                                </ListItemButton>
-                            </ListItem>
+                                    </IconButton>
+                                }>
+                                    <ListItemButton onClick={() => handleClick(recipe)}>
+                                        <ListItemAvatar>
+                                            <div className={"imageContainer"}>
+                                                <Avatar className = "searchListImage" src={recipe.image}  alt={"searchresult"}/>
+                                            </div>
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={<h3>{recipe.name}</h3>} // Recipe name
+                                            secondary={<span>{recipe.description || "No description available"}</span>} // Optional description
+                                            style = {{marginLeft:"20px"}}
+                                        />
+                                    </ListItemButton>
+                                </ListItem>
+                            ))}
                         </List>
                     </Paper>
                 </Box>
 
-                <Box sx={{width:"49%", height:"100%", display:"flex", flexDirection:"column"}}>
-                    <Paper>
-                        <IngredientComponent/>
+                <Box className={"mealPlanInfoContainer"}>
+                    <Paper className={"mealPlanIngredientPaper"}>
+                        <IngredientComponent ingredients={mealplan.ingredientDTOList} limitHeight={true}/>
                     </Paper>
                 </Box>
             </Box>
-            <Paper sx={{width:"100%", marginTop:"0"}}>
-                <NutritionComponent/>
+            <Paper sx={{width:"100%", marginTop:"20px"}}>
+                <NutritionComponent nutrition={mealplan.nutritionDTOList}/>
             </Paper>
+
+            <Dialog open={dialogOpen} onClose={handleCloseDialog} fullWidth maxWidth="md">
+                <DialogTitle>Weekly Summary</DialogTitle>
+                <DialogContent>
+                    {weeklySummary && (
+                        <>
+                            <h2>Ingredients</h2>
+                            <List>
+                                {weeklySummary.ingredientDTOList.map((ingredient, index) => (
+                                    <ListItem key={index}>
+                                        <ListItemText primary={ingredient.name} secondary={`${ingredient.amount} ${ingredient.unit}`} />
+                                    </ListItem>
+                                ))}
+                            </List>
+                            <h2>Nutrition</h2>
+                            <List>
+                                {weeklySummary.nutritionDTOList.map((nutrition, index) => (
+                                    <ListItem key={index}>
+                                        <ListItemText primary={nutrition.name} secondary={`${nutrition.amount} ${nutrition.unit}`} />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+
+            </Dialog>
         </Box>
     );
 }

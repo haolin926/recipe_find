@@ -12,7 +12,7 @@ public class IngredientServiceImpl implements IngredientService {
     private final IngredientRepository ingredientsRepository;
 
     @Override
-    public IngredientsEntity saveOrUpdateIngredient(String ingredientName) {
+    public IngredientsEntity findOrSaveIngredient(String ingredientName) {
         IngredientsEntity ingredient = ingredientsRepository.findByIngredientName(ingredientName);
         if (ingredient == null) {
             ingredient = new IngredientsEntity();

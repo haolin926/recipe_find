@@ -1,8 +1,7 @@
 package com.recipefind.backend.service;
 
 import com.recipefind.backend.entity.Recipe;
-import com.recipefind.backend.entity.SavedRecipeEntity;
-import com.recipefind.backend.entity.User;
+import com.recipefind.backend.entity.RecipeDTO;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -12,7 +11,7 @@ public interface SaveRecipeService {
     Integer saveRecipeForUser(Integer userId, Recipe recipe);
 
     @Transactional
-    List<SavedRecipeEntity> findByUser(User user);
+    List<RecipeDTO> findByUser(Integer userId) throws Exception;
 
     @Transactional
     boolean deleteSavedRecipe(Integer userId, Integer recipeId);

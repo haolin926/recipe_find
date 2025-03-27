@@ -6,15 +6,22 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(null);
-
+    const [loading, setLoading] = useState(true);
     useEffect (() => {
         axios.get("http://localhost:8080/api/user/info", {withCredentials: true})
-            .then(res => setUser(res.data))
-            .catch((error) => {
-                console.error("Error fetching user:", error);
+            .then(res => {
+                if (res.data === null || res.data === "") {
+                    setUser(null);
+                } else {
+                    setUser(res.data);
+                }
+            })
+            .catch(() => {
                 setUser(null);
-            });
+            })
+            .finally(() => setLoading(false));
     }, [])
+
     const login = async (values) => {
         try {
             const response = await axios.post("http://localhost:8080/api/user/login", {
@@ -69,9 +76,60 @@ export const AuthProvider = ({children}) => {
         }
     };
 
+    const updateUser = async (updatedData) => {
+        try {
+            const userDTO = {
+                username: updatedData.username,
+                email: updatedData.email,
+                userPhoto: updatedData.userPhoto
+            };
+
+            const response = await axios.put("http://localhost:8080/api/user/update",
+                userDTO,
+                { withCredentials: true });
+            if (response.status === 200) { // Check if update was successful
+                setUser(response.data);
+                return true;
+            } // Update AuthContext with new user data
+        } catch (error) {
+            console.error("Failed to update profile", error);
+            return false;
+        }
+    };
+
+
+    const updatePassword = async (passwordData) => {
+        const { password, newPassword } = passwordData;
+
+        // Create the map or object to send to the backend
+        const passwordMap = {
+            "oldPassword": password,
+            "newPassword": newPassword
+        };
+        try {
+            const response = await axios.put("http://localhost:8080/api/user/changepassword",
+                passwordMap,
+                { withCredentials: true });
+            if (response.status === 200) {
+                message.success("Password updated successfully");
+                return true;
+            } else {
+                message.error("Failed to update password");
+                return false;
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 400) {
+                message.error("The original password is incorrect");
+            } else {
+                message.error("Failed to update password");
+            }
+            console.error("Failed to update password", error);
+
+        }
+    };
 
     return (
-        <AuthContext.Provider value={{user, login, logout, register}}>
+        <AuthContext.Provider value={{user, login, logout, register, loading, updateUser, updatePassword}}>
             {children}
         </AuthContext.Provider>
     );

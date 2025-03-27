@@ -5,9 +5,11 @@ import Typography from '@mui/material/Typography';
 import {Button, IconButton} from "@mui/material";
 import { MenuOutlined, UserOutlined} from "@ant-design/icons";
 import Box from "@mui/material/Box";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {AuthContext} from "../AuthContext";
-import {Dropdown, message} from "antd";
+import {Avatar, Dropdown, message} from "antd";
+import "./headerBar.css";
+
 
 function ResponsiveAppBar({toggleDrawer}) {
     const {user, logout} = React.useContext(AuthContext);
@@ -24,11 +26,15 @@ function ResponsiveAppBar({toggleDrawer}) {
         }
     }
 
+    const handleProfileClick = () => {
+        navigate("/profile");
+    }
+
     const items = [
         {
             key: '1',
             label: (
-                <Typography>Profile</Typography>
+                <Typography onClick={handleProfileClick}>Profile</Typography>
             ),
         },
         {
@@ -46,31 +52,34 @@ function ResponsiveAppBar({toggleDrawer}) {
     const handleLoginClick = () => {
         navigate("/login");
     };
-
     return (
         <Box sx={{maxWidth: "100vw"}}>
-            <AppBar position="fixed" sx={{backgroundColor:"#e67e22", color:"black", maxWidth:"100%"}}>
+            <AppBar id = "mainBar" position="fixed">
                 <Box>
                     <Toolbar disableGutters>
                         <IconButton onClick={toggleDrawer} color={"primary"}>
                             <MenuOutlined style={{color:"black"}}/>
                         </IconButton>
-                        <Typography variant="h6" component="div" sx={{flexGrow: "1", color:"white" }}>
-                            Recipe Search
-                        </Typography>
+                        <Box id={"headerLeftBox"}>
+                            <Typography variant="h6" component="div" sx={{color:"white" }}>
+                                Recipe Search
+                            </Typography>
+                        </Box>
                         <Box sx={{marginRight:"10px"}}>
                         {user != null ? (
                             <>
                                 <Dropdown menu={{items}} trigger={["click"]} overlayStyle={{ zIndex: 1301 }}>
-                                    <IconButton>
-                                        <UserOutlined style={{color:"white"}}/>
-                                    </IconButton>
+                                    <Avatar
+                                        src={user.userPhoto}
+                                        icon={!user.userPhoto && <UserOutlined/>}
+                                        style={{ cursor: "pointer", marginBottom: 10 }}
+                                    />
                                 </Dropdown>
                             </>
                             ):(
                                 <>
-                                    <Button color="inherit" sx={{color:"white"}} onClick={handleRegisterClick}>Sign up</Button>
-                                    <Button color="inherit" sx={{color:"white"}} onClick={handleLoginClick}>Login</Button>
+                                    <Button color="inherit" onClick={handleRegisterClick}>Sign up</Button>
+                                    <Button color="inherit" onClick={handleLoginClick}>Login</Button>
                                 </>
                             )}
                         </Box>

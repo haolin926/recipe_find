@@ -11,3 +11,48 @@
     width: 100%;
     align-items: center;
 }
+.nutritionPaperContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 1%;
+    overflow: auto;
+}
+.nutritionPaper {
+    width: 48%;
+    height: 80%;
+    min-height: 300px;
+    margin: 1%;
+    position: relative;
+}
+.ant-carousel {
+    height:300px;
+}
+.carouselDots {
+    position: absolute !important; /* Override default positioning */
+    bottom: 10px; /* Place it at the bottom */
+    width: 100%; /* Ensure it spans full width */
+    text-align: center;
+}
+.nutritionInfo {
+    display: flex;
+    justify-content: center;
+    overflow: auto;
+}
+@media (max-width: 1000px) {
+    .nutritionPaperContainer {
+        flex-direction: column;
+        gap: 50px;
+        height: 90%;
+        margin-top: 20px;
+    }
+    .nutritionPaper {
+        width:90%;
+        height:100%;
+        margin: auto;
+    }
+    .nutritionInfo{
+        margin-bottom: 40px;
+    }
+}

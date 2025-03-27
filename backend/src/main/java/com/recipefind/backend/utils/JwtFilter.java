@@ -7,9 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNullApi;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -29,7 +29,9 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/user/login",
             "/api/recipe/name",
             "/api/recipe/id",
-            "/api/recipe/image"
+            "/api/recipe/image",
+            "/api/recipe/searchByIngredients",
+            "/api/comment"
     );
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -39,6 +41,12 @@ public class JwtFilter extends OncePerRequestFilter {
         // Skip authentication for allowed paths
         if (ALLOWED_PATHS.contains(requestURI)) {
             filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (request.getCookies() == null) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
             return;
         }
 

@@ -26,9 +26,6 @@ const SearchByImageComponent = ({ onImageUpload }) => {
                 tabIndex={-1}
                 className={"customButton"}
                 size={"large"}
-                sx={{
-                    width: "30%"
-                }}
             >
                 Upload Dish Image
                 <VisuallyHiddenInput

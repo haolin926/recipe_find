@@ -1,0 +1,17 @@
+.openDialogButton {
+    margin-top: 10px;
+}
+.changePasswordForm {
+    width: 400px;
+}
+.buttonGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+@media (max-width: 600px) {
+    .changePasswordForm {
+        width: 300px;
+    }
+
+}

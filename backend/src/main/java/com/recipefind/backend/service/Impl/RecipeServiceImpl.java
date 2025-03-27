@@ -3,12 +3,14 @@ package com.recipefind.backend.service.Impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recipefind.backend.dao.CommentRepository;
 import com.recipefind.backend.dao.RecipeRepository;
 import com.recipefind.backend.entity.*;
 import com.recipefind.backend.service.*;
 import com.recipefind.backend.utils.FractionConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -22,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,17 +34,20 @@ public class RecipeServiceImpl implements RecipeService {
     private final SaveRecipeService saveRecipeService;
     private final IngredientService ingredientService;
     private final NutritionService nutritionService;
-    private final UserService userService;
     private final FractionConverter fractionConverter;
+    private final GptService gptService;
     private final static List<String> wantedNutrition = List.of(
             "Calories",
             "Fat",
             "Carbohydrates",
             "Protein"
     );
+    private final CommentRepository commentRepository;
+    @Setter
     @Value("${spoonacular.api.key}")
     private String apiKey;
 
+    @Setter
     @Value("${google.vision.api.key}")
     private String googleVisionApiKey;
 
@@ -66,14 +70,20 @@ public class RecipeServiceImpl implements RecipeService {
             recipeList.add(formattedRecipe);
         }
 
+        recipeList = gptService.constructRecipeDescription(recipeList);
+
         return recipeList;
     }
 
-
-
     @Override
-    public RecipeDTO findRecipeById(Integer recipeId) throws JsonProcessingException {
-        String url = "https://api.spoonacular.com/recipes/" + recipeId + "/information?apiKey=" + apiKey + "&includeNutrition=true";
+    public RecipeDTO findRecipeInSpoonacularByApiId(Integer recipeApiId) throws JsonProcessingException {
+
+        Recipe recipe = findRecipeByApiId(recipeApiId);
+        if (recipe != null) {
+            return recipe.convertToRecipeDTO();
+        }
+
+        String url = "https://api.spoonacular.com/recipes/" + recipeApiId + "/information?apiKey=" + apiKey + "&includeNutrition=true";
         String response = restTemplate.getForEntity(url, String.class).getBody();
         JsonNode responseJson = objectMapper.readTree(response);
 
@@ -81,21 +91,20 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public RecipeDTO constructRecipeFromComplexSearch(JsonNode recipe) {
+    public Recipe findRecipeById(Integer recipeId) {
+        return recipeRepository.findRecipeByRecipeId(recipeId.longValue());
+    }
 
-        RecipeDTO formattedRecipe = new RecipeDTO();
+
+    private RecipeDTO constructRecipeFromComplexSearch(JsonNode recipe) {
 
         JsonNode nutrientsNode = recipe.path("nutrition").path("nutrients");
         JsonNode ingredientsNode = recipe.path("nutrition").path("ingredients");
         JsonNode instructionsNode = recipe.path("analyzedInstructions");
         JsonNode stepsNode = instructionsNode.get(0).path("steps");
 
-        String recipeName = recipe.path("title").asText();
-        Integer id = recipe.path("id").asInt();
-        String image = recipe.path("image").asText();
-        formattedRecipe.setRecipeApiId(id);
-        formattedRecipe.setName(recipeName);
-        formattedRecipe.setImage(image);
+        RecipeDTO formattedRecipe = constructBasicRecipeInformation(recipe);
+
 
         for (JsonNode nutrient : nutrientsNode) {
             String name = nutrient.path("name").asText();
@@ -127,14 +136,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     private RecipeDTO constructRecipeFromInformation (JsonNode recipe) {
-        RecipeDTO formattedRecipe = new RecipeDTO();
-
-        String recipeName = recipe.path("title").asText();
-        Integer id = recipe.path("id").asInt();
-        String image = recipe.path("image").asText();
-        formattedRecipe.setRecipeApiId(id);
-        formattedRecipe.setName(recipeName);
-        formattedRecipe.setImage(image);
+        RecipeDTO formattedRecipe = constructBasicRecipeInformation(recipe);
 
         //Get Ingredients
         JsonNode ingredientNode = recipe.path("extendedIngredients");
@@ -158,31 +160,87 @@ public class RecipeServiceImpl implements RecipeService {
 
         List<NutritionDTO> nutritionDTOList = new ArrayList<>();
 
-        for (JsonNode nutrient : nutrientsNode) {
-            String name = nutrient.path("name").asText();
-            if (!wantedNutrition.contains(name)) {
-                continue;
+        if (nutrientsNode.isArray() && !nutrientsNode.isEmpty()) {
+            for (JsonNode nutrient : nutrientsNode) {
+                String name = nutrient.path("name").asText();
+                if (!wantedNutrition.contains(name)) {
+                    continue;
+                }
+                String amount = nutrient.path("amount").asText();
+                String unit = nutrient.path("unit").asText();
+                NutritionDTO nutritionDTO = new NutritionDTO(name, amount, unit);
+                nutritionDTOList.add(nutritionDTO);
             }
-            String amount = nutrient.path("amount").asText();
-            String unit = nutrient.path("unit").asText();
-            NutritionDTO nutritionDTO = new NutritionDTO(name, amount, unit);
-            nutritionDTOList.add(nutritionDTO);
         }
         formattedRecipe.setNutritionDTOS(nutritionDTOList);
 
         // Get Instruction
         JsonNode instructionsNode = recipe.path("analyzedInstructions");
-        JsonNode stepsNode = instructionsNode.get(0).path("steps");
-
-        for (JsonNode stepNode : stepsNode) {
-            String step = stepNode.path("step").asText();
-            formattedRecipe.getInstructions().add(step);
+        if (instructionsNode.isArray() && !instructionsNode.isEmpty()) {
+            JsonNode stepsNode = instructionsNode.get(0).path("steps");
+            for (JsonNode stepNode : stepsNode) {
+                String step = stepNode.path("step").asText();
+                formattedRecipe.getInstructions().add(step);
+            }
+        } else {
+            List<String> instructions = new ArrayList<>();
+            formattedRecipe.setInstructions(instructions);
         }
+
+        formattedRecipe.setRate((float) 0);
+
+        List<RecipeDTO> recipeDTOList = new ArrayList<>();
+        recipeDTOList.add(formattedRecipe);
+        recipeDTOList = gptService.constructRecipeDescription(recipeDTOList);
+
+        return recipeDTOList.get(0);
+    }
+
+    private RecipeDTO constructBasicRecipeInformation(JsonNode recipe) {
+        RecipeDTO formattedRecipe = new RecipeDTO();
+        String recipeName = recipe.path("title").asText();
+        Integer id = recipe.path("id").asInt();
+        String image = recipe.path("image").asText();
+        boolean glutenFree = recipe.path("glutenFree").asBoolean();
+        boolean dairyFree = recipe.path("dairyFree").asBoolean();
+        boolean vegetarian = recipe.path("vegetarian").asBoolean();
+        Integer cookTime = recipe.path("readyInMinutes").asInt();
+
+        formattedRecipe.setRecipeApiId(id);
+        formattedRecipe.setName(recipeName);
+        formattedRecipe.setImage(image);
+        formattedRecipe.setDairyFree(dairyFree);
+        formattedRecipe.setGlutenFree(glutenFree);
+        formattedRecipe.setVegetarian(vegetarian);
+        formattedRecipe.setCookTime(cookTime);
 
         return formattedRecipe;
     }
 
-    private List<Prediction> predictName(MultipartFile image) throws Exception {
+    public RecipeDTO constructRecipeSearchByIngredient (JsonNode recipe) {
+        RecipeDTO formattedRecipe = new RecipeDTO();
+        String recipeName = recipe.path("title").asText();
+        Integer id = recipe.path("id").asInt();
+        String image = recipe.path("image").asText();
+        List<String> usedIngredientNames = new ArrayList<>();
+
+        JsonNode usedIngredients = recipe.path("usedIngredients");
+
+        for (JsonNode usedIngredient : usedIngredients) {
+            String name = usedIngredient.path("name").asText();
+            String capitalizedName = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+            usedIngredientNames.add(capitalizedName);
+        }
+
+        formattedRecipe.setRecipeApiId(id);
+        formattedRecipe.setName(recipeName);
+        formattedRecipe.setImage(image);
+        formattedRecipe.setUsedIngredients(usedIngredientNames);
+
+        return formattedRecipe;
+    }
+
+    public List<Prediction> predictName(MultipartFile image) throws Exception {
         try{
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -215,7 +273,7 @@ public class RecipeServiceImpl implements RecipeService {
                     String name = predictedResult.path("dish_name").asText().replace("_", " ");
                     float probability = predictedResult.path("probability").floatValue();
 
-                    if(probability > 0.3) {
+                    if(probability > 0) {
                         result.setName(name);
                         result.setProbability(probability);
                         predictedNames.add(result);
@@ -234,7 +292,7 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
 
-    private List<String> labelIngredients (MultipartFile image){
+    public List<String> labelIngredients(MultipartFile image) throws Exception {
         int retries = 0;
         try {
             // convert image to base64 for access the API
@@ -298,12 +356,12 @@ public class RecipeServiceImpl implements RecipeService {
                 }
             }
         } catch(Exception e){
-            System.out.println("API request failed: " + e.getMessage());
+            throw new Exception("API request failed: " + e.getMessage());
         }
         return Collections.emptyList();
     }
 
-    private boolean isIngredient (String name) {
+    public boolean isIngredient (String name) {
         String url = getCheckIngredientURL();
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("ingredientList", name);
@@ -332,13 +390,10 @@ public class RecipeServiceImpl implements RecipeService {
             List<Prediction> predictName = predictName(image);
 
             List<String> ingredients = labelIngredients(image);
-//            List<String> ingredients= new ArrayList<>();
-//            ingredients.add("meal");
-//            ingredients.add("banana");
-//            ingredients.add("recipe");
+            List<String> filteredIngredients = gptService.validateFoodItems(ingredients);
             PredictResult predictResult = new PredictResult();
             predictResult.setPredictName(predictName);
-            predictResult.setDetectedIngredients(ingredients);
+            predictResult.setDetectedIngredients(filteredIngredients);
 
             return predictResult;
         } catch (Exception e) {
@@ -351,79 +406,80 @@ public class RecipeServiceImpl implements RecipeService {
     public Integer saveFavouriteRecipe(RecipeDTO recipeDTO, Integer userId) {
 
         //check if this recipe already in the db
-        Recipe existedRecipe = isRecipeExist(recipeDTO);
+        Recipe existedRecipe = findRecipeByApiId(recipeDTO.getRecipeApiId());
         if(existedRecipe != null) {
             System.out.println("Find matching recipe, saving into db");
             return saveRecipeService.saveRecipeForUser(userId, existedRecipe);
         }
         else {
-            Recipe recipe = new Recipe();
-            recipe.setRecipeApiId(recipeDTO.getRecipeApiId());
-            recipe.setName(recipeDTO.getName());
-            recipe.setImageUrl(recipeDTO.getImage());
-            recipe.setInstruction(recipeDTO.getInstructions());
+            Recipe savedRecipe = saveRecipe(recipeDTO);
 
-            List<RecipeIngredientsEntity> recipeIngredientsEntities = new ArrayList<>();
-            try {
-                for (IngredientDTO ingredientDTO : recipeDTO.getIngredientDTOS()) {
-                    RecipeIngredientsEntity recipeIngredientsEntity = new RecipeIngredientsEntity();
-
-                    IngredientsEntity ingredientsEntity = ingredientService.saveOrUpdateIngredient(ingredientDTO.getName());
-                    BigDecimal ingredientAmount = fractionConverter.fractionToDecimal(ingredientDTO.getAmount());
-
-                    recipeIngredientsEntity.setIngredientsEntity(ingredientsEntity);
-                    recipeIngredientsEntity.setIngredientAmount(ingredientAmount);
-                    recipeIngredientsEntity.setIngredientUnit(ingredientDTO.getUnit());
-                    recipeIngredientsEntity.setRecipe(recipe);
-
-                    recipeIngredientsEntities.add(recipeIngredientsEntity);
-                }
-                recipe.setRecipeIngredientsEntities(recipeIngredientsEntities);
-
-                List<RecipeNutritionEntity> recipeNutritionEntities = new ArrayList<>();
-                for (NutritionDTO nutritionDTO : recipeDTO.getNutritionDTOS()) {
-                    NutritionEntity nutritionEntity = nutritionService.saveOrUpdateNutrition(nutritionDTO.getName());
-
-                    RecipeNutritionEntity recipeNutritionEntity = new RecipeNutritionEntity();
-
-                    recipeNutritionEntity.setNutritionEntity(nutritionEntity);
-                    recipeNutritionEntity.setAmount(new BigDecimal(nutritionDTO.getAmount()));
-                    recipeNutritionEntity.setUnit(nutritionDTO.getUnit());
-                    recipeNutritionEntity.setRecipe(recipe);
-
-                    recipeNutritionEntities.add(recipeNutritionEntity);
-                }
-
-                recipe.setRecipeNutritionEntities(recipeNutritionEntities);
-                System.out.println("construct recipe success");
-
-                Recipe savedRecipe = recipeRepository.save(recipe);
+            if (savedRecipe != null) {
                 System.out.println("Saved recipe into db");
                 return saveRecipeService.saveRecipeForUser(userId, savedRecipe);
 
-            } catch (Exception e) {
-                throw new RuntimeException("Error saving recipe: " + e.getMessage());
+            } else {
+                return null;
             }
         }
     }
 
     @Override
-    public List<RecipeDTO> getSavedRecipes(Integer userId) throws Exception {
-        User user = userService.getUserById(userId);
+    @Transactional
+    public Recipe saveRecipe(RecipeDTO recipeDTO) {
 
-        if (user != null){
-            try {
-                List<SavedRecipeEntity> savedRecipes = saveRecipeService.findByUser(user);
-                return savedRecipes.stream()
-                        .map(savedRecipe -> savedRecipe.getRecipe().convertToRecipeDTO())
-                        .collect(Collectors.toList());
-            } catch (Exception e){
-                throw new Exception(e);
+        Recipe recipe = new Recipe();
+        recipe.setRecipeApiId(recipeDTO.getRecipeApiId());
+        recipe.setName(recipeDTO.getName());
+        recipe.setImageUrl(recipeDTO.getImage());
+        recipe.setInstruction(recipeDTO.getInstructions());
+        recipe.setDescription(recipeDTO.getDescription());
+        recipe.setDairyFree(recipeDTO.isDairyFree());
+        recipe.setGlutenFree(recipeDTO.isGlutenFree());
+        recipe.setVegetarian(recipeDTO.isVegetarian());
+        recipe.setCookTime(recipeDTO.getCookTime());
+        recipe.setRate(recipeDTO.getRate());
+
+        List<RecipeIngredientsEntity> recipeIngredientsEntities = new ArrayList<>();
+        try {
+            for (IngredientDTO ingredientDTO : recipeDTO.getIngredientDTOS()) {
+                RecipeIngredientsEntity recipeIngredientsEntity = new RecipeIngredientsEntity();
+
+                IngredientsEntity ingredientsEntity = ingredientService.findOrSaveIngredient(ingredientDTO.getName());
+                BigDecimal ingredientAmount = fractionConverter.fractionToDecimal(ingredientDTO.getAmount());
+
+                recipeIngredientsEntity.setIngredientsEntity(ingredientsEntity);
+                recipeIngredientsEntity.setIngredientAmount(ingredientAmount);
+                recipeIngredientsEntity.setIngredientUnit(ingredientDTO.getUnit());
+                recipeIngredientsEntity.setRecipe(recipe);
+
+                recipeIngredientsEntities.add(recipeIngredientsEntity);
+            }
+            recipe.setRecipeIngredientsEntities(recipeIngredientsEntities);
+
+            List<RecipeNutritionEntity> recipeNutritionEntities = new ArrayList<>();
+            for (NutritionDTO nutritionDTO : recipeDTO.getNutritionDTOS()) {
+                NutritionEntity nutritionEntity = nutritionService.findOrSaveNutrition(nutritionDTO.getName());
+
+                RecipeNutritionEntity recipeNutritionEntity = new RecipeNutritionEntity();
+
+                recipeNutritionEntity.setNutritionEntity(nutritionEntity);
+                recipeNutritionEntity.setAmount(new BigDecimal(nutritionDTO.getAmount()));
+                recipeNutritionEntity.setUnit(nutritionDTO.getUnit());
+                recipeNutritionEntity.setRecipe(recipe);
+
+                recipeNutritionEntities.add(recipeNutritionEntity);
             }
 
-        }
+            recipe.setRecipeNutritionEntities(recipeNutritionEntities);
+            System.out.println("construct recipe success");
 
-        return new ArrayList<>();
+            return recipeRepository.save(recipe);
+
+        } catch (Exception e) {
+            System.err.println("Error saving recipe: " + e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -437,27 +493,38 @@ public class RecipeServiceImpl implements RecipeService {
             JsonNode rootNode = objectMapper.readTree(response.getBody());
             List<RecipeDTO> recipeDTOList = new ArrayList<>();
             for (JsonNode recipe : rootNode) {
-                RecipeDTO recipeDTO = new RecipeDTO();
 
-                String name = recipe.path("title").asText();
-                Integer id = recipe.path("id").asInt();
-                String image = recipe.path("image").asText();
-
-                recipeDTO.setId(id);
-                recipeDTO.setName(name);
-                recipeDTO.setImage(image);
+                RecipeDTO recipeDTO = constructRecipeSearchByIngredient(recipe);
 
                 recipeDTOList.add(recipeDTO);
             }
+            recipeDTOList = gptService.constructRecipeDescription(recipeDTOList);
 
             return recipeDTOList;
         }
         return null;
     }
 
+    @Override
+    public Recipe findRecipeByApiId(Integer recipeApiId) {
+        return recipeRepository.findRecipeByRecipeApiId(recipeApiId);
+    }
 
-    private Recipe isRecipeExist(RecipeDTO recipeDTO) {
-        return recipeRepository.findRecipeByRecipeApiId(recipeDTO.getRecipeApiId());
+    @Override
+    public Boolean updateRecipeRate(Long recipeId, Float rate) {
+        try {
+            Recipe recipe = recipeRepository.findRecipeByRecipeId(recipeId);
+            Float currentRate = recipe.getRate();
+            Integer totalCommentNumber = commentRepository.countCommentsByRecipeIdAndRateNot(recipeId.intValue(), (float) 0);
+            Float newRate = (currentRate + rate) / (totalCommentNumber);
+
+            recipe.setRate(newRate);
+            recipeRepository.save(recipe);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private String getGoogleVisionUrl() {

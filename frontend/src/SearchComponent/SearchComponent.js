@@ -11,13 +11,14 @@ import {useLocation} from "react-router-dom";
 import RecognitionResultComponent from "./RecognitionResultComponent/RecognitionResultComponent";
 import ResultListComponent from "./ResultListComponent";
 import axios from "axios";
-import {Spin} from "antd";
+import {message, Spin} from "antd";
+import SearchByIngredientComponent from "./SearchByIngredientComponent";
 
 function SearchComponent () {
 
     const location = useLocation();
     const [value, setValue] = React.useState(location.state?.value || "1");
-    const [contentToDisplay, setContentToDisplay] = React.useState("null");
+    const [contentToDisplay, setContentToDisplay] = React.useState(null);
     const [predictionResult, setPredictionResult] = React.useState(null);
     const [uploadedImage, setUploadedImage] = React.useState(null);
     const [searchResult, setSearchResult] = React.useState(null);
@@ -27,6 +28,10 @@ function SearchComponent () {
     };
 
     const handleSearchByName = async (name) => {
+        if (!name || name.trim() === "") {
+            message.error("Invalid Name Input");
+            return;
+        }
         setContentToDisplay("loading");
         try {
             const response = await axios.get(`http://localhost:8080/api/recipe/name?queryName=${name}`);
@@ -35,8 +40,9 @@ function SearchComponent () {
             setContentToDisplay("searchResult");
         } catch (error) {
             setSearchResult(null);
+            message.error("Failed to search recipes.")
             console.error("Error fetching recipe by name:", error);
-            setContentToDisplay("searchResult");
+            setContentToDisplay(null);
         }
     }
 
@@ -62,15 +68,38 @@ function SearchComponent () {
 
             } catch (error) {
                 console.error("error uploading Image");
+                message.error("Prediction failed");
                 setPredictionResult(null);
-                setContentToDisplay("predictResult");
+                setContentToDisplay(null);
             }
         }
     };
 
+    const handleSearchByIngredients = async (ingredients) => {
+        if (!Array.isArray(ingredients) || ingredients.length === 0) {
+            message.error("Please provide a list of ingredients.");
+            return;
+        }
+        const ingredientsParam = ingredients.join(",");
+        setContentToDisplay("loading");
+        try {
+            const response = await axios.get("http://localhost:8080/api/recipe/searchByIngredients",
+                {
+                    params:{ingredients: ingredientsParam}
+                });
+            setSearchResult(response.data);
+            setContentToDisplay("searchResult");
+            console.log(response.data);
+        } catch (error) {
+            message.error("An error happened during search.")
+            console.error("Error: ", error);
+            setContentToDisplay(null);
+        }
+    };
+
     return (
-        <Box className={"bodyBackground"} sx={{display:"flex", alignItems:"center", flexDirection:"column"}}>
-            <Paper className="contentContaienr" sx={{width:"50%", margin:"3%", height:"20%"}}>
+        <Box className={"bodyBackground searchPageBackground"}>
+            <Paper className="searchBar">
                 <TabContext value={value}>
                     <AppBar position={"static"}>
                         <Tabs value={value} onChange={handleChange} centered variant="fullWidth" textColor="inherit">
@@ -86,19 +115,19 @@ function SearchComponent () {
                         <SearchByImageComponent onImageUpload={handleImageUpload}/>
                     </TabPanel>
                     <TabPanel value="3">
-                        content 3
+                        <SearchByIngredientComponent onSearchByIngredients={handleSearchByIngredients}/>
                     </TabPanel>
                 </TabContext>
             </Paper>
 
             <Paper className={"contentContainer"}>
                 {contentToDisplay === 'loading' &&
-                    <Box style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", minHeight:"40vh"}}>
+                    <Box id={"resultContainer"}>
                         <Spin></Spin>
                     </Box>
                 }
                 {contentToDisplay === 'searchResult' && <ResultListComponent searchResult={searchResult}/>}
-                {contentToDisplay === 'predictResult' && <RecognitionResultComponent predictions={predictionResult} image={uploadedImage} onSearchByName={handleSearchByName}/>}
+                {contentToDisplay === 'predictResult' && <RecognitionResultComponent predictions={predictionResult} image={uploadedImage} onSearchByName={handleSearchByName} onSearchByIngredient={handleSearchByIngredients}/>}
                 </Paper>
         </Box>
     );

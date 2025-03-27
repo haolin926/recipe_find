@@ -1,0 +1,10 @@
+.loginWindowContainer {
+    width: 40%;
+    margin-top: 10%;
+    height: 100%;
+}
+@media (max-width: 1000px) {
+    .loginWindowContainer {
+        width: 80%;
+    }
+}

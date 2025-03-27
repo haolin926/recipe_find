@@ -3,6 +3,7 @@ import React, {useContext, useEffect} from "react";
 import {AuthContext} from "../AuthContext";
 import {useNavigate} from "react-router-dom";
 import LoginWindowComponent from "../LoginWindowComponent/LoginWindowComponent";
+import "./LoginComponent.css";
 
 function LoginComponent () {
 
@@ -17,7 +18,7 @@ function LoginComponent () {
 
     return (
         <Box className={"bodyBackground"} sx={{display:"flex", justifyContent:"center", lexDirection:"column"}}>
-            <Box sx={{width:"40%", marginTop:"10%", height:"100%"}}>
+            <Box className={"loginWindowContainer"}>
                 <LoginWindowComponent/>
             </Box>
         </Box>

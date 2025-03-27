@@ -1,20 +1,26 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { Box, AppBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox } from "@mui/material";
 import { PlusOutlined } from "@ant-design/icons";
 import { FloatButton } from "antd";
+import "./IngredientComponent.css";
 
-const IngredientComponent = ({ ingredients }) => {
+const IngredientComponent = ({ ingredients, limitHeight }) => {
     const ingredientList = ingredients ?? []; // Ensure ingredients is an array
 
-    const [rows, setRows] = useState(
-        ingredientList.map((ingredient, index) => ({
+    const [rows, setRows] = useState([]);
+
+    useEffect(() => {
+        const newRows = ingredientList.map((ingredient, index) => ({
             id: index,
-            name: ingredient?.name ?? "Unknown Ingredient", // Fallback if name is undefined
-            amount: ingredient?.amount ?? "N/A", // Fallback if amount is undefined
+            name: ingredient?.name ?? "Unknown Ingredient",
+            amount: ingredient?.amount ?? "N/A",
             selected: false,
             unit: ingredient?.unit ?? ""
-        }))
-    );
+        }));
+
+        // Only update state if the new data is different
+        setRows(prevRows => (JSON.stringify(prevRows) === JSON.stringify(newRows) ? prevRows : newRows));
+    }, [ingredientList]);
 
     const handleCheckboxChange = (id) => {
         setRows((prevRows) =>
@@ -34,58 +40,60 @@ const IngredientComponent = ({ ingredients }) => {
     const allSelected = rows.length > 0 && rows.every((row) => row.selected);
 
     return (
-        <Box className="bottomContainerPaper">
+        <Box className={`bottomContainerPaper ${limitHeight ? 'limitedHeight' : ''}`} sx={{position:"relative"}}>
             <Box sx={{ width: "100%" }}>
-                <AppBar position="static" sx={{ width: "100%", borderRadius: "5px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <AppBar position="static" className={"commonHeader"}>
                     <h1>Ingredient Summary</h1>
                 </AppBar>
             </Box>
-            <TableContainer component={Box} sx={{ height: "100%", overflow: "auto" }}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell padding="checkbox">
-                                <Checkbox
-                                    checked={allSelected}
-                                    onChange={handleSelectAll}
-                                    disabled={rows.length === 0} // Disable if no ingredients
-                                />
-                            </TableCell>
-                            <TableCell>Ingredient</TableCell>
-                            <TableCell>Amount</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.length > 0 ? (
-                            rows.map((row) => (
-                                <TableRow key={row.id}>
-                                    <TableCell padding="checkbox">
-                                        <Checkbox
-                                            checked={row.selected}
-                                            onChange={() => handleCheckboxChange(row.id)}
-                                        />
-                                    </TableCell>
-                                    <TableCell>{row.name}</TableCell>
-                                    <TableCell>{`${row.amount} ${row.unit}`}</TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
+                <Box className={"resultInfoContainer"}>
+                <TableContainer component={Box} sx={{ height: "100%", overflow: "auto" }}>
+                    <Table>
+                        <TableHead>
                             <TableRow>
-                                <TableCell colSpan={3} align="center">
-                                    No ingredients available
+                                <TableCell padding="checkbox">
+                                    <Checkbox
+                                        checked={allSelected}
+                                        onChange={handleSelectAll}
+                                        disabled={rows.length === 0} // Disable if no ingredients
+                                    />
                                 </TableCell>
+                                <TableCell>Ingredient</TableCell>
+                                <TableCell>Amount</TableCell>
                             </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <FloatButton
-                style={{ position: "absolute", color: "white", backgroundColor: "#e67e22", bottom: "10px", right: "10px" }}
-                tooltip={<div>Add Selected Ingredient To Shopping List</div>}
-                icon={<PlusOutlined />}
-                type={"primary"}
-                disabled={rows.length === 0} // Disable if no ingredients
-            />
+                        </TableHead>
+                        <TableBody>
+                            {rows.length > 0 ? (
+                                rows.map((row) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell padding="checkbox">
+                                            <Checkbox
+                                                checked={row.selected}
+                                                onChange={() => handleCheckboxChange(row.id)}
+                                            />
+                                        </TableCell>
+                                        <TableCell>{row.name}</TableCell>
+                                        <TableCell>{`${row.amount} ${row.unit}`}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center">
+                                        No ingredients available
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <FloatButton
+                    className={"addToShoppingButton"}
+                    tooltip={<div>Add Selected Ingredient To Shopping List</div>}
+                    icon={<PlusOutlined />}
+                    type={"primary"}
+                    disabled={rows.length === 0} // Disable if no ingredients
+                />
+            </Box>
         </Box>
     );
 };

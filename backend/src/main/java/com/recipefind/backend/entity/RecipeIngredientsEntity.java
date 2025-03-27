@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-
 @Entity
 @Table(name = "recipe_ingredients", schema = "recipe_db", catalog = "recipe_application")
 @Data

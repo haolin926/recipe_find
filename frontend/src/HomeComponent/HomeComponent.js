@@ -24,45 +24,22 @@ class HomeComponent extends Component {
     handleSearchByImageClick = () => {
         this.props.navigate("/search", {state: {value:"2"}});
     }
-
-    getRecipe = async (name) => {
-        try {
-            const response = await fetch(`http://localhost:8080/api/recipe/name?queryName=${encodeURIComponent(name)}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            });
-
-            if (!response.ok) {
-                this.setState({loading: false});
-                throw new Error("Error fetching Data");
-            }
-            const data = await response.json();
-            this.setState({loading: false});
-            this.props.navigate("/result", {state: {data: data}});
-
-        } catch (error) {
-            console.error("Error fetching Data: ", error);
-        }
-    }
-
-    closeDialog = () => {
-        this.setState({dialogOpen: false});
+    handleSearchByIngredientClick = () => {
+        this.props.navigate("/search", {state: {value:"3"}});
     }
 
     render() {
         return (
             <Box className={"bodyBackground"}>
-                <Box
-                    sx={{display:"flex", width:"100%", flexDirection: "column", gap: "30px", paddingTop:"8px", height: "100%", margin:0, alignItems:"center"}}>
-                        <Box sx={{display:"flex", width:"100%", flexDirection: "column", gap: "30px", padding: "8px", maxWidth:"none", marginTop:"20%", paddingLeft:"10%"}}>
+                <Box id={"bodyContainer"}>
+                        <Box id={"contentContainer"}>
                             <Box sx={{width:"30%"}}>
                                 <Typography variant="h3" sx={{color:"#141414"}}>LOOK FOR RECIPES</Typography>
                             </Box>
-                            <Box sx={{display:"flex", width:"100%", flexDirection: "row", gap:"20px"}}>
+                            <Box id={"buttonContainer"}>
                                 <Button className="mainButton" type="text" size="large" onClick={this.handleSearchByNameClick}>Search Recipe by Name</Button>
                                 <Button className="mainButton" type="text" size="large" onClick={this.handleSearchByImageClick}>Search by Uploading Image</Button>
+                                <Button className="mainButton" type="text" size="large" onClick={this.handleSearchByIngredientClick}>Search by Ingredients</Button>
                             </Box>
                         </Box>
                 </Box>

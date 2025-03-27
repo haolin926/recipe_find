@@ -15,3 +15,26 @@
     height: 100%;
     width: 100%;
 }
+.savedRecipeContainer {
+    height: 100%;
+    display: flex;
+    margin-top: 3%;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding-bottom: 5%;
+}
+.cardContainer {
+    display: flex;
+    width: 90%;
+    align-items: center;
+}
+.savedRecipeCard {
+    width:210px;
+}
+@media (max-width: 600px) {
+    .cardContainer {
+        width: 100%;
+        justify-content: center;
+    }
+}

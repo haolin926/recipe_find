@@ -1,59 +1,96 @@
 import React from 'react';
-import {Avatar, List, Spin} from 'antd';
+import {Avatar, Button, List, Popover, Tag, Typography} from 'antd';
 import "./ResultListComponent.css";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
+import {FieldTimeOutlined} from "@ant-design/icons";
 
 
-const ResultListComponent = ({searchResult}) => {
-    const data = searchResult;
-
+const ResultListComponent = ({ searchResult }) => {
     const navigate = useNavigate();
-    const handleTitleClick = async (item) => {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/recipe/id?queryId=${item.recipeApiId}`);
-            if(response.status === 200) {
-                const recipe = response.data;
-                navigate('/result', {state: {recipe}});
-            } else {
-                console.log("error");
-            }
-        } catch (error) {
-            console.log(error);
-        }
+
+    const handleTitleClick = (item) => {
+        navigate('/result', { state: { recipeId: item.recipeApiId } });
     };
+
     return (
         <Box sx={{ width: '100%', height: "100%" }}>
             <AppBar className={"commonHeader"} position={"static"}>
                 <h2>Search Result</h2>
             </AppBar>
-            <Box className={"listContainer"}>
-                <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    pagination={{
-                        pageSize: 5,
-                    }}
-                    style={{minHeight:"100%"}}
-                    renderItem={(item) => (
-                        <List.Item>
-                            <List.Item.Meta
-                                avatar={
-                                <div className={"imageContainer"}>
-                                    <Avatar className = "searchListImage" src={item.image}  alt={"searchresult"}/>
-                                </div>
-                                }
-                                title={<a onClick={() => handleTitleClick(item)}>{item.name}</a>}
-                                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                            />
-                        </List.Item>
-                    )}
-                />
+
+            {/* List Container */}
+            <Box className="listContainer">
+                {searchResult && searchResult.length > 0 ? (
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={searchResult}
+                        pagination={{ pageSize: 5 }}
+                        style={{ minHeight: "100%" }}
+                        renderItem={(item) => {
+                            const hasUsedIngredients = item.usedIngredients && item.usedIngredients.length > 0;
+
+                            return (
+                                <List.Item>
+                                    <List.Item.Meta
+                                        avatar={
+                                            <div className="imageContainer">
+                                                <Avatar className="searchListImage" src={item.image} alt="Recipe Image" />
+                                            </div>
+                                        }
+                                        title={<a onClick={() => handleTitleClick(item)}>{item.name}</a>}
+                                        description={
+                                            <div id="descriptionContainer">
+
+                                                <Typography className="description">
+                                                    {item.description || "No description available"}
+                                                </Typography>
+
+                                                <div className="tagsContainer">
+                                                    <div style={{ marginTop: "8px" }}>
+                                                        {item.glutenFree && (
+                                                            <Tag color="green" className="resultTags">
+                                                                Gluten Free
+                                                            </Tag>
+                                                        )}
+                                                        {item.dairyFree && (
+                                                            <Tag color="blue" className="resultTags">
+                                                                Dairy Free
+                                                            </Tag>
+                                                        )}
+                                                        {item.vegetarian && (
+                                                            <Tag color="green" className="resultTags">
+                                                                Vegetarian
+                                                            </Tag>
+                                                        )}
+                                                    </div>
+
+                                                    <div id="ingredientInfoDiv">
+                                                        {hasUsedIngredients && (
+                                                            <Popover
+                                                                content={<ul>{item.usedIngredients.map((ing, index) => <li key={index}>{ing}</li>)}</ul>}
+                                                                title="Ingredients Used"
+                                                            >
+                                                                <Button variant="contained">Ingredients Used</Button>
+                                                            </Popover>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    />
+                                </List.Item>
+                            );
+                        }}
+                    />
+                ) : (
+                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+                        <Typography variant="h6">No results found</Typography>
+                    </Box>
+                )}
             </Box>
         </Box>
     );
-}
-
+};
 export default ResultListComponent;

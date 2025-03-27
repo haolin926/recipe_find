@@ -14,7 +14,8 @@ function ResponsiveDrawer({visible, toggleDrawer}) {
 
     return (
         <Drawer title="Menu" placement="left" onClose={toggleDrawer} open={visible}
-                variant="temporary">
+                variant="temporary"
+                width={300}>
             <Menu
                 mode="inline"
                 onClick={({ key }) => handleMenuClick(key)}

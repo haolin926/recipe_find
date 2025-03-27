@@ -7,6 +7,8 @@ import com.recipefind.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,19 +19,17 @@ import org.slf4j.LoggerFactory;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     @Override
     @Transactional
     public Boolean createUser(UserDTO userDTO) {
         User user = new User();
         user.setUsername(userDTO.getUsername());
-        user.setPassword(userDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setEmail(userDTO.getEmail());
 
-        System.out.println(user.getUsername());
-        System.out.println(user.getPassword());
-        System.out.println(user.getEmail());
         try {
             User saveduser = userRepository.save(user);
             System.out.println(saveduser.getId());
@@ -46,8 +46,10 @@ public class UserServiceImpl implements UserService {
     public User loginUser(UserDTO userDTO) {
         User user = userRepository.findByUsername(userDTO.getUsername());
         if (user != null) {
-            if (user.getPassword().equals(userDTO.getPassword())) {
+            if (passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
                 return user;
+            }else {
+                logger.error("Password mismatch for user {}, password hash: {}, stored password: {}", userDTO.getUsername(), passwordEncoder.encode(userDTO.getPassword()), user.getPassword());
             }
         }
         return null;
@@ -56,5 +58,43 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Integer id) {
         return userRepository.findById(id.longValue()).orElse(null);
+    }
+
+    @Override
+    public User updateUser(User user, UserDTO userDTO) {
+        if (userDTO.getUsername() != null) {
+            user.setUsername(userDTO.getUsername());
+        }
+        if (userDTO.getEmail() != null) {
+            user.setEmail(userDTO.getEmail());
+        }
+        if (userDTO.getUserPhoto() != null) {
+            user.setUserPhoto(userDTO.getUserPhoto());
+        }
+        try {
+            return userRepository.save(user);
+        } catch (DataAccessException e) {
+            logger.error("Database error while updating user: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Unexpected error while updating user: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public User updatePassword(User user, String originalPassword, String newPassword) {
+        if (passwordEncoder.matches(originalPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            try {
+                return userRepository.save(user);
+            } catch (DataAccessException e) {
+                logger.error("Database error while updating password: {}", e.getMessage());
+            } catch (Exception e) {
+                logger.error("Unexpected error while updating password: {}", e.getMessage());
+            }
+        } else {
+            throw new DataIntegrityViolationException("Original password incorrect");
+        }
+        return null;
     }
 }

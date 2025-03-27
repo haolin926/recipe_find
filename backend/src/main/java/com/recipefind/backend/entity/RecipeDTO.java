@@ -32,4 +32,18 @@ public class RecipeDTO {
 
     @JsonProperty("nutrition")
     private List<NutritionDTO> nutritionDTOS = new ArrayList<>();
+
+    private String description;
+
+    private boolean dairyFree;
+
+    private boolean glutenFree;
+
+    private boolean vegetarian;
+
+    private Integer cookTime;
+
+    private List<String> usedIngredients;
+
+    private Float rate;
 }

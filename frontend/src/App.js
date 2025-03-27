@@ -15,6 +15,7 @@ import SearchComponent from "./SearchComponent/SearchComponent";
 import LoginComponent from "./LoginComponent/LoginComponent";
 import SignUpComponent from "./SignUpComponent/SignUpComponent";
 import {AuthProvider} from "./AuthContext";
+import ProfileComponent from "./ProfileComponent/ProfileComponent";
 const muiTheme = createTheme({
     palette: {
         primary: {
@@ -73,6 +74,7 @@ function App() {
                                           <Route path={"/login"} element={<LoginComponent/>}/>
                                           <Route path={"*"} element={<HomeComponent/>}/>
                                           <Route path={"/signup"} element={<SignUpComponent/>}/>
+                                          <Route path={"/profile"} element={<ProfileComponent/>}/>
                                       </Routes>
                                   </Content>
                           </Layout>

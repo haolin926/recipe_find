@@ -2,10 +2,10 @@ package com.recipefind.backend.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.recipefind.backend.entity.Prediction;
 import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.entity.PredictResult;
 import com.recipefind.backend.service.RecipeService;
-import com.recipefind.backend.service.SaveRecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,6 @@ public class RecipeController {
     public ResponseEntity<List<RecipeDTO>> getRecipeByName(@RequestParam("queryName") String queryName) {
 
         try {
-            System.out.println("Query Name: " + queryName);
             List<RecipeDTO> recipes = recipeService.findRecipesByName(queryName);
 
             if (!(recipes.isEmpty())) {
@@ -40,9 +39,18 @@ public class RecipeController {
     }
 
     @PostMapping(value="/image", consumes="multipart/form-data")
-    public PredictResult getRecipeByImage(@RequestParam("image") MultipartFile image) throws Exception {
-        System.out.println("File name" + image.getOriginalFilename());
-        return recipeService.imagePrediction(image);
+    public ResponseEntity<PredictResult> getRecipeByImage(@RequestParam("image") MultipartFile image) {
+        try {
+            PredictResult prediction = recipeService.imagePrediction(image);
+
+            if (prediction != null) {
+                return ResponseEntity.ok(prediction);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 
@@ -51,7 +59,7 @@ public class RecipeController {
 
         try {
             System.out.println("Query ID: " + id.toString());
-            RecipeDTO recipes = recipeService.findRecipeById(id);
+            RecipeDTO recipes = recipeService.findRecipeInSpoonacularByApiId(id);
 
             if (!(recipes == null)) {
                 return ResponseEntity.ok(recipes);
@@ -60,6 +68,7 @@ public class RecipeController {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -3,8 +3,9 @@ import "./RecognitionResultComponent.css";
 import {Link, Paper} from "@mui/material";
 import {Button, Tag, Typography, Divider, Flex, Progress} from 'antd'
 import React from 'react';
+import AppBar from "@mui/material/AppBar";
 
-function RecognitionResultComponent ( {predictions, image, onSearchByName}) {
+function RecognitionResultComponent ( {predictions, image, onSearchByName, onSearchByIngredient}) {
     const [selectedTags, setSelectedTags] = React.useState([]);
     console.log(predictions);
     const handleChange = (tag, checked) => {
@@ -18,14 +19,20 @@ function RecognitionResultComponent ( {predictions, image, onSearchByName}) {
         onSearchByName(name);
     }
 
+    const handleSearchByIngredient = (ingredients) => {
+        onSearchByIngredient(ingredients);
+    }
+
     return (
           <Box className={"container"}>
               <Box className={"predictImageContainer"}>
                   <img className="recognizeImage" src={URL.createObjectURL(image)} alt={"recognize"}/>
               </Box>
-              <Paper className={"predictionResultContainer"}>
-                  <Box className={"predictResult"}>
-                    <Typography.Title level={2}>Prediction Result</Typography.Title>
+              <Box className={"predictionResultContainer"}>
+                  <Paper elevation={3} className={"predictResult"}>
+                    <AppBar position="static" className={"commonHeader"}>
+                        <h3>Prediction Result</h3>
+                    </AppBar>
                     <Flex className={"nameAndProbability"} vertical>
                         {predictions && predictions.predictName.length > 0 ? (
                             predictions.predictName.map((prediction, index) => (
@@ -42,14 +49,17 @@ function RecognitionResultComponent ( {predictions, image, onSearchByName}) {
                                 </div>
                             ))
                         ) : (
-                            <Typography.Text>No predictions available</Typography.Text>
+                            <Box className={"errorMessageContainer"}>
+                                <Typography.Text>No predictions available</Typography.Text>
+                            </Box>
                         )}
                     </Flex>
-                  </Box>
-                  <Divider></Divider>
-                  <Box className={"predictResult"}>
-                      <Typography.Title level={2}>Ingredients Found</Typography.Title>
-                      <Flex gap={4} wrap>
+                  </Paper>
+                  <Paper elevation={3} className={"predictResult"}>
+                      <AppBar position="static" className={"commonHeader"}>
+                          <h3>Ingredient Found</h3>
+                      </AppBar>
+                      <Flex gap={4} wrap className={"nameAndProbability"}>
                           {predictions && predictions.detectedIngredients.length > 0 ? (
                               predictions.detectedIngredients.map((ingredient) => (
                                   <Tag.CheckableTag
@@ -62,12 +72,16 @@ function RecognitionResultComponent ( {predictions, image, onSearchByName}) {
                                   </Tag.CheckableTag>
                               ))
                               ) : (
-                                <Typography.Text>No ingredients found</Typography.Text>
+                              <Box className={"errorMessageContainer"}>
+                                  <Typography.Text>No ingredients found</Typography.Text>
+                              </Box>
                             )}
                       </Flex>
-                      <Button className="bottomRightButton">Search By Selected Ingredients</Button>
-                  </Box>
-              </Paper>
+                      <Button className="searchByIngredientButton" onClick={() => handleSearchByIngredient(selectedTags)}>
+                          Search By Selected Ingredients
+                      </Button>
+                  </Paper>
+              </Box>
         </Box>
     );
 }

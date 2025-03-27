@@ -3,9 +3,10 @@ package com.recipefind.backend.entity;
 import com.recipefind.backend.utils.FractionConverter;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "recipes")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Recipe {
 
     @Id
@@ -38,11 +41,29 @@ public class Recipe {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<String> instruction;
 
+    @Column(name = "dairy_free")
+    private boolean dairyFree;
+
+    @Column(name = "gluten_free")
+    private boolean glutenFree;
+
+    @Column(name = "vegetarian")
+    private boolean vegetarian;
+
+    @Column(name = "cook_time")
+    private Integer cookTime;
+
+    @Column(name = "rate")
+    private Float rate;
+
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredientsEntity> recipeIngredientsEntities = new ArrayList<>();
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeNutritionEntity> recipeNutritionEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MealPlanRecipeEntity> mealPlanRecipeEntities = new ArrayList<>();
 
     public RecipeDTO convertToRecipeDTO() {
         RecipeDTO recipeDTO = new RecipeDTO();
@@ -53,6 +74,12 @@ public class Recipe {
         recipeDTO.setName(this.getName());
         recipeDTO.setImage(this.getImageUrl());
         recipeDTO.setInstructions(this.getInstruction());
+        recipeDTO.setDairyFree(this.dairyFree);
+        recipeDTO.setGlutenFree(this.glutenFree);
+        recipeDTO.setVegetarian(this.vegetarian);
+        recipeDTO.setCookTime(this.cookTime);
+        recipeDTO.setDescription(this.getDescription());
+        recipeDTO.setRate(this.rate);
 
         // Map RecipeIngredientsEntity to IngredientDTO
         List<IngredientDTO> ingredientDTOS = this.getRecipeIngredientsEntities().stream()

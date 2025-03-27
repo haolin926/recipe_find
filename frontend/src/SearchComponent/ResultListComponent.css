@@ -11,4 +11,45 @@
 }
 .listContainer {
     padding:2%;
+    min-height: 200px;
+}
+#listMainContainer {
+    width: 100%;
+    height: 100%;
+}
+.tags{
+    font-size: 14px;
+    padding: 3px 9px;
+}
+.description {
+    max-height: 4.5em;
+    line-height: 1.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limits to 3 lines */
+    -webkit-box-orient: vertical;
+}
+.tagsContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#ingredientInfoDiv {
+    margin-top: 10px;
+}
+@media (max-width: 600px) {
+    .tags {
+        font-size: 12px;
+        padding: 3px;
+    }
+    .description {
+        font-size: 12px;
+    }
+    .tagsContainer {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 }

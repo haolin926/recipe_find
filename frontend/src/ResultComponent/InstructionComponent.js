@@ -4,47 +4,39 @@ import List from "@mui/material/List";
 import {Accordion, AccordionDetails, AccordionSummary, ListItem} from "@mui/material";
 import {DownOutlined} from "@ant-design/icons";
 import Typography from "@mui/material/Typography";
-import React from "react";
+import React, {useState} from "react";
 import "./ResultComponent.css";
 import PropTypes from 'prop-types';
+import { Steps } from "antd";
 
 const ResultComponent = ({instructions}) => {
+    const { Step } = Steps;
+    const [current, setCurrent] = useState(0);
+
+    const onChange = (value) => {
+        setCurrent(value);
+    };
 
     return (
         <Box className="bottomContainerPaper">
             <AppBar position="static" className={"commonHeader"}>
                 <h1>Instructions</h1>
             </AppBar>
-            <Box sx={{
-                flex: 1,
-                overflow: "auto", // Enable vertical scrolling
-                height:"100%",
-                width:"100%",
-            }}>
-                <List
-                    sx={{
-                        position: 'static',
-                        overflow: 'auto',
-                        width: '80%',
-                        margin: 'auto',
-                    }}>
+            <Box className="resultInfoContainer">
+                <Steps
+                    direction="vertical"
+                    current={current}
+                    onChange={onChange}
+                    className="instructionList"
+                >
                     {instructions.map((instruction, index) => (
-                        <ListItem key={index}>
-                            <Accordion sx={{ width: "100%" }}>
-                                <AccordionSummary
-                                    expandIcon={<DownOutlined />}
-                                    aria-controls={`panel${index}-content`}
-                                    id={`panel${index}-header`}
-                                >
-                                    <Typography component="span">Step {index + 1}</Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <Typography>{instruction}</Typography>
-                                </AccordionDetails>
-                            </Accordion>
-                        </ListItem>
+                        <Step
+                            key={index}
+                            title={`Step ${index + 1}`}
+                            description={<Typography>{instruction}</Typography>}
+                        />
                     ))}
-                </List>
+                </Steps>
             </Box>
         </Box>
     );

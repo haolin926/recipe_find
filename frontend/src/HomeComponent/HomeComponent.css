@@ -14,3 +14,34 @@
     background-position: center;
     background-repeat: no-repeat;
 }
+#bodyContainer {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 30px;
+    padding-top: 8px;
+    height: 100%;
+    margin:0;
+    align-items: center;
+}
+#contentContainer {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: 30px;
+    max-width: none;
+    margin-top: 20%;
+    padding: 8px 8px 8px 10%;
+}
+#buttonContainer{
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    gap: 20px;
+}
+
+@media (max-width: 600px) {
+    #buttonContainer {
+        flex-direction: column;
+    }
+}

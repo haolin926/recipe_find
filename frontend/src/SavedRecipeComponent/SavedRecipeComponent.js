@@ -60,13 +60,16 @@ function SavedRecipeComponent () {
 
     const { Meta } = Card;
     const handleImageClick = (recipe) => {
-        navigate('/result', { state: { recipe } });
+        navigate('/result', {state: {recipeId: recipe.recipeApiId}});
     };
 
     useEffect(() => {
         if (user) {
             // Call fetchSavedRecipe only if user is logged in
             fetchSavedRecipe();
+        } else {
+            navigate("/login");
+            message.info("You must login first to see saved recipes");
         }
     }, [user]);
 
@@ -80,14 +83,12 @@ function SavedRecipeComponent () {
     };
 
     return (
-        <Box sx={{height: "100%", display:"flex", marginTop:"3%", flexDirection:"column", alignItems:"center", minHeight:"100vh", paddingBottom:"5%"}}>
-            <Space wrap size="large" style={{ display: "flex", width:"80%", alignItems:"center"}}>
+        <Box className={"savedRecipeContainer"}>
+            <Space wrap size="large" className={"cardContainer"}>
                 {recipes.map((recipe, index) => (
                     <Card
                         hoverable
-                        style={{
-                            width: 240,
-                        }}
+                        className={"savedRecipeCard"}
                         cover={
                         <div className={"cardImageContainer"}>
                             <img className="cardImage" alt="example" src={recipe.image} onClick={() => handleImageClick(recipe)} />

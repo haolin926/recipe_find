@@ -1,0 +1,48 @@
+.mealPlanBody {
+    margin: 1%;
+    overflow: auto;
+}
+.mealPlanTopContainer {
+    display: flex;
+    width: 98%;
+    height: 100px;
+    align-items: center;
+    justify-content: space-between;
+}
+.plannedRecipeAndIngredient {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 400px;
+    margin-top: 20px;
+    gap:2%
+}
+.mealPlanInfoContainer {
+    width: 49%;
+    min-height: 450px;
+}
+.savedRecipePaper {
+    min-height:450px;
+    overflow: auto;
+}
+.mealPlanIngredientPaper {
+    height: 100%;
+
+}
+@media (max-width: 600px) {
+    .plannedRecipeAndIngredient {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height:100%;
+        width:100%;
+        gap:20px;
+    }
+    .mealPlanInfoContainer {
+        width: 100%;
+    }
+    .savedRecipePaper {
+        min-height: 400px;
+        width: 100%;
+    }
+}

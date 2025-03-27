@@ -3,8 +3,6 @@ package com.recipefind.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigInteger;
-
 @Entity
 @Table(name = "users", schema = "recipe_db")
 @Getter
@@ -22,5 +20,10 @@ public class User {
     private String password;
     @Column(name = "email", nullable = false)
     private String email;
+    @Column(name = "user_photo")
+    private String userPhoto;
 
+    public UserDTO convertToDTO() {
+        return new UserDTO(this.id.toString(), this.username, this.email, this.userPhoto);
+    }
 }

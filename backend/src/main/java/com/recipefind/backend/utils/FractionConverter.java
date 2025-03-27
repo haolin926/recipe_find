@@ -10,7 +10,6 @@ public class FractionConverter {
 
     public String decimalToFraction(double decimal) {
         BigDecimal decimalValue = new BigDecimal(decimal);
-        BigDecimal tolerance = new BigDecimal("1E-6"); // Tolerance for rounding
 
         BigInteger numerator = decimalValue.multiply(BigDecimal.valueOf(1000000)).toBigInteger(); // Multiply to avoid precision loss
         BigInteger denominator = BigInteger.valueOf(1000000);  // Use 1000000 as the denominator (you can use higher values for better precision)

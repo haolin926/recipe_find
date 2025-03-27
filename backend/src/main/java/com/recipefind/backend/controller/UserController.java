@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -59,7 +60,7 @@ public class UserController {
 
                 response.addCookie(cookie);
 
-                return ResponseEntity.ok(new UserDTO(userLoggedIn.getId().toString(), userLoggedIn.getUsername(), userLoggedIn.getEmail()));
+                return ResponseEntity.ok(userLoggedIn.convertToDTO());
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username/Password");
             }
@@ -84,8 +85,56 @@ public class UserController {
         }
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUserInfo(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+        User user = validateTokenAndGetUser(request);
+
+        try {
+            User userUpdated = userService.updateUser(user, userDTO);
+            if (userUpdated != null) {
+                return ResponseEntity.ok(userUpdated.convertToDTO());
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User update failed.");
+            }
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
+    }
+
+    @PutMapping("/changepassword")
+    public ResponseEntity<?> changeUserPassword(@RequestBody Map<String, String> passwordUpdate, HttpServletRequest request) {
+        System.out.println("Received password update request: " + passwordUpdate);
+        User user = validateTokenAndGetUser(request);
+
+        String originalPassword = passwordUpdate.get("oldPassword");
+        String newPassword = passwordUpdate.get("newPassword");
+
+        try {
+            User userUpdated = userService.updatePassword(user, originalPassword, newPassword);
+            if (userUpdated != null) {
+                return ResponseEntity.ok(userUpdated.convertToDTO());
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password change failed.");
+            }
+        } catch (DataIntegrityViolationException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Original Password Incorrect");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
+    }
+
     @GetMapping("/info")
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+        User user = validateTokenAndGetUser(request);
+
+        return ResponseEntity.ok(user.convertToDTO());
+    }
+
+    private User validateTokenAndGetUser(HttpServletRequest request) {
         // Extract the JWT token from the cookies
         String token = Arrays.stream(request.getCookies())
                 .filter(cookie -> "token".equals(cookie.getName()))
@@ -94,7 +143,7 @@ public class UserController {
                 .orElse(null);
 
         if (token == null || !jwtUtil.validateToken(token)) {
-            return ResponseEntity.status(401).body("Unauthorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
 
         String userId = jwtUtil.extractUserId(token);
@@ -103,8 +152,6 @@ public class UserController {
         Optional<User> optionalUser = Optional.ofNullable(userService.getUserById(Integer.valueOf(userId)));
 
         // If the user is not found, throw an exception
-        User user = optionalUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        return ResponseEntity.ok(new UserDTO(user.getId().toString(), user.getUsername(), user.getEmail()));
+        return optionalUser.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 }

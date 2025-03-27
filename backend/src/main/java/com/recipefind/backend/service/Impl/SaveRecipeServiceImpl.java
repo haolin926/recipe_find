@@ -2,6 +2,7 @@ package com.recipefind.backend.service.Impl;
 
 import com.recipefind.backend.dao.SaveRecipeRepository;
 import com.recipefind.backend.entity.Recipe;
+import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.entity.SavedRecipeEntity;
 import com.recipefind.backend.entity.User;
 import com.recipefind.backend.service.SaveRecipeService;
@@ -10,7 +11,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +41,21 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
     }
 
     @Override
-    public List<SavedRecipeEntity> findByUser(User user) {
-        return saveRecipeRepository.findByUser(user);
+    public List<RecipeDTO> findByUser(Integer userId) throws Exception {
+        User user = userService.getUserById(userId);
+
+        if (user != null){
+            try {
+                List<SavedRecipeEntity> savedRecipes = saveRecipeRepository.findByUser(user);
+                return savedRecipes.stream()
+                        .map(savedRecipe -> savedRecipe.getRecipe().convertToRecipeDTO())
+                        .collect(Collectors.toList());
+            } catch (Exception e){
+                throw new Exception(e);
+            }
+        } else {
+            throw new Exception("User Not Found");
+        }
     }
 
     @Transactional
@@ -51,7 +67,7 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
         }
         try {
             int deletedRows = saveRecipeRepository.deleteByUserIdAndRecipeId(userId, recipeId);
-            return deletedRows > 0; // Returns true if the delete was successful
+            return deletedRows > 0; // Returns true if delete was successful
         } catch (Exception e) {
             e.printStackTrace();
             return false;

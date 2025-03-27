@@ -15,13 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SavedRecipeController {
 
-    private final RecipeService recipeService;
-
     private final SaveRecipeService saveRecipeService;
     @GetMapping
     public ResponseEntity<?> getSavedRecipes(@RequestParam("userId")Integer userId) {
         try {
-            List<RecipeDTO> recipes = recipeService.getSavedRecipes(userId);
+            List<RecipeDTO> recipes = saveRecipeService.findByUser(userId);
 
             if (recipes != null) {
                 return ResponseEntity.ok(recipes);
