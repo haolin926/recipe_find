@@ -22,7 +22,7 @@ public class RecipeController {
 
     private final RecipeService recipeService;
 
-    private static final Logger logger = LoggerFactory.getLogger(RecipeController.class);;
+    private static final Logger logger = LoggerFactory.getLogger(RecipeController.class);
 
     @GetMapping("/name")
     public ResponseEntity<List<RecipeDTO>> getRecipeByName(@RequestParam("queryName") String queryName) {

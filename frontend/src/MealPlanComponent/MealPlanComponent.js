@@ -19,7 +19,7 @@ import {DeleteOutlined} from "@ant-design/icons";
 import "../ResultComponent/ResultComponent.css";
 import IngredientComponent from "../ResultComponent/IngredientComponent";
 import NutritionComponent from "../ResultComponent/NutritionComponent";
-import {useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import {AuthContext} from "../AuthContext";
 import {useNavigate} from "react-router-dom";
 import {Avatar, message} from "antd";
@@ -37,20 +37,10 @@ export default function MealPlanComponent() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (user) {
-            // Call fetchSavedRecipe only if user is logged in
-            fetchMealPlanForCurrentDate();
-        } else {
-            message.info("You must login first to visit meal plan");
-            navigate("/login");
-        }
-    }, [user, selectedDate]);
-
-    const fetchMealPlanForCurrentDate= async () => {
+    const fetchMealPlanForCurrentDate = useCallback(async () => {
         if (user == null) {
             message.info("You must login first to visit meal plan");
-            navigate("/login")
+            navigate("/login");
             return;
         }
         try {
@@ -58,7 +48,7 @@ export default function MealPlanComponent() {
             const response = await axios.get(
                 "http://localhost:8080/api/mealplan/ondate",
                 {
-                    params :{userId : user.id, date: formattedDate},
+                    params: { userId: user.id, date: formattedDate },
                     withCredentials: true
                 }
             );
@@ -73,7 +63,17 @@ export default function MealPlanComponent() {
             console.error('Error fetching meal plan:', error);
             setMealPlan([]);
         }
-    }
+    }, [user, selectedDate, navigate]);
+    
+    useEffect(() => {
+        if (user) {
+            // Call fetchSavedRecipe only if user is logged in
+            fetchMealPlanForCurrentDate();
+        } else {
+            message.info("You must login first to visit meal plan");
+            navigate("/login");
+        }
+    }, [user, selectedDate, fetchMealPlanForCurrentDate, navigate]);
 
     const getWeeklySummary = async () => {
         try {

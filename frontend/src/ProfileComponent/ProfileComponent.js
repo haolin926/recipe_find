@@ -5,7 +5,6 @@ import {AuthContext} from "../AuthContext";
 import {Dialog, DialogTitle} from "@mui/material";
 import "./ProfileComponent.css";
 import Box from "@mui/material/Box";
-import {useNavigate} from "react-router-dom";
 
 function ProfileComponent () {
     const { user, updateUser, updatePassword, loading } = useContext(AuthContext); // Get user & updateUser function

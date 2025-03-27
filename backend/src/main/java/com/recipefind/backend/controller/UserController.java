@@ -26,7 +26,7 @@ public class UserController {
 
     private final JwtUtil jwtUtil;
 
-    private Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;

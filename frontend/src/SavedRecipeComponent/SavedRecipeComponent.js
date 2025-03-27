@@ -4,7 +4,7 @@ import {Card, message, Space} from "antd";
 import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import "./SavedRecipeComponent.css";
 import axios from "axios";
-import {useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import {AuthContext} from "../AuthContext";
 import {useNavigate} from "react-router-dom";
 
@@ -12,17 +12,17 @@ function SavedRecipeComponent () {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const [recipes, setRecipes] = useState([]);
-    const fetchSavedRecipe = async () => {
+    const fetchSavedRecipe = useCallback(async () => {
         if (user == null) {
             message.info("You must login first to see saved recipes");
-            navigate("/login")
+            navigate("/login");
             return;
         }
         try {
             const response = await axios.get(
                 "http://localhost:8080/api/savedRecipe",
                 {
-                    params :{userId : user.id},
+                    params: { userId: user.id },
                     withCredentials: true
                 }
             );
@@ -37,7 +37,7 @@ function SavedRecipeComponent () {
             console.error('Error fetching saved recipes:', error);
             setRecipes([]);
         }
-    }
+    }, [user, navigate]);
 
     const deleteSavedRecipe = async (recipe) => {
         try {

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class IngredientServiceImpl implements IngredientService {
     private final IngredientRepository ingredientsRepository;
-    private Logger logger = LoggerFactory.getLogger(IngredientServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(IngredientServiceImpl.class);
     @Override
     public IngredientsEntity findOrSaveIngredient(String ingredientName) {
         IngredientsEntity ingredient = ingredientsRepository.findByIngredientName(ingredientName);

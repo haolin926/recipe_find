@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
                 if (commentDTO.getRate() != 0.0) {
                     if(!recipeService.updateRecipeRate(recipeId, commentDTO.getRate())) {
                         throw new RuntimeException("Failed to update recipe rate!");
-                    };
+                    }
                 }
 
                 return savedComment.getCommentId();

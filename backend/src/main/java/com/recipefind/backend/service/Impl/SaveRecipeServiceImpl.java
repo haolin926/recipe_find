@@ -22,7 +22,7 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
 
     private final UserService userService;
     private final SaveRecipeRepository saveRecipeRepository;
-    private Logger logger = LoggerFactory.getLogger(SaveRecipeServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(SaveRecipeServiceImpl.class);
 
     @Transactional
     @Override

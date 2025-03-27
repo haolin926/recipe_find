@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState, useMemo} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import "./ResultComponent.css";
 import Box from "@mui/material/Box";
@@ -29,7 +29,7 @@ const ResultComponent = () => {
     const [fileList, setFileList] = useState([]);
     const [userRate, setUserRate] = useState(0.0);
 
-    const defaultRecipe = {
+    const defaultRecipe = useMemo(() => ({
         name: "No Name available",
         description: "No description available",
         rating: 0,
@@ -38,7 +38,7 @@ const ResultComponent = () => {
         instructions: [],
         ingredients: [],
         nutrition: []
-    };
+    }), []);
 
     const [comments, setComments] = useState([]);
 
@@ -129,7 +129,7 @@ const ResultComponent = () => {
         console.log(value);
     }
 
-    const fetchRecipeComments = async () => {
+    const fetchRecipeComments = useCallback(async () => {
         setCommentsLoading(true);
         if (!recipeId) {
             message.error("Failed to get recipe id");
@@ -150,7 +150,7 @@ const ResultComponent = () => {
         } finally {
             setCommentsLoading(false);
         }
-    };
+    });
 
 
     useEffect(() => {

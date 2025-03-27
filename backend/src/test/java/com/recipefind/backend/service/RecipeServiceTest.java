@@ -3,7 +3,6 @@ package com.recipefind.backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.recipefind.backend.dao.CommentRepository;
 import com.recipefind.backend.dao.RecipeRepository;
 import com.recipefind.backend.entity.*;
 import com.recipefind.backend.service.Impl.RecipeServiceImpl;
