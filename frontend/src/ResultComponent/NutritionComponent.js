@@ -6,7 +6,6 @@ import React from "react";
 import "./ResultComponent.css";
 import "./NutritionComponent.css";
 import {Carousel} from "antd";
-import PropTypes from 'prop-types';
 
 const NutritionComponent = ({nutrition}) => {
     // if nutrition is undefined or null, set it to an empty array

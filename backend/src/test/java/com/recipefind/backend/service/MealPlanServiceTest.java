@@ -69,9 +69,7 @@ public class MealPlanServiceTest {
         when(userService.getUserById(userId)).thenReturn(null);
 
         // Act & Assert
-        Exception exception = assertThrows(Exception.class, () -> {
-            mealPlanService.getMealPlanForUserOnDate(userId, date);
-        });
+        Exception exception = assertThrows(Exception.class, () -> mealPlanService.getMealPlanForUserOnDate(userId, date));
         assertEquals("Failed in Getting meal plan due to user is not valid", exception.getMessage());
         verify(userService, times(1)).getUserById(userId);
         verify(mealPlanRepository, never()).getMealPlanEntityByUserAndPlannedDate(any(User.class), any(Date.class));
@@ -149,9 +147,7 @@ public class MealPlanServiceTest {
         when(userService.getUserById(userId)).thenReturn(null);
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO));
         assertEquals("User not found", exception.getMessage());
         verify(userService, times(1)).getUserById(userId);
         verify(recipeService, never()).findRecipeByApiId(anyInt());
@@ -259,9 +255,7 @@ public class MealPlanServiceTest {
         when(mealPlanRepository.save(any(MealPlanEntity.class))).thenThrow(new RuntimeException("Failed to save MealPlanEntity"));
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO));
         assertEquals("Failed to save MealPlanEntity", exception.getMessage());
         verify(userService, times(1)).getUserById(userId);
         verify(recipeService, times(1)).findRecipeByApiId(recipeDTO.getRecipeApiId());
@@ -295,9 +289,7 @@ public class MealPlanServiceTest {
         when(mealPlanRecipeRepository.save(any(MealPlanRecipeEntity.class))).thenThrow(new RuntimeException("Failed to save MealPlanRecipeEntity"));
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO));
         assertEquals("Failed to save MealPlanRecipeEntity", exception.getMessage());
         verify(userService, times(1)).getUserById(userId);
         verify(recipeService, times(1)).findRecipeByApiId(recipeDTO.getRecipeApiId());

@@ -6,6 +6,8 @@ import com.recipefind.backend.entity.MealPlanWeeklySummaryDTO;
 import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.service.MealPlanService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.Date;
 public class MealPlanController {
 
     private final MealPlanService mealPlanService;
+    private final Logger logger = LoggerFactory.getLogger(MealPlanController.class);
 
     @GetMapping("/ondate")
     public ResponseEntity<?> getMealPlanForUserOnDate (@RequestParam("userId") Integer userId, @DateTimeFormat(pattern = "yyyy-MM-dd") @RequestParam("date") Date date) {
@@ -31,7 +34,7 @@ public class MealPlanController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get meal plans for user");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get meal plans for user");
         }
     }
@@ -47,7 +50,7 @@ public class MealPlanController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add recipe into meal plan");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add recipe into meal plan");
         }
     }
@@ -63,7 +66,7 @@ public class MealPlanController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete recipe from meal plan");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete recipe from meal plan");
         }
     }

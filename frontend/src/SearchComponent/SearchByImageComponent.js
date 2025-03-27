@@ -1,7 +1,6 @@
 import {Button, styled} from "@mui/material";
 import React from "react";
 import Box from "@mui/material/Box";
-import axios from "axios";
 
 const SearchByImageComponent = ({ onImageUpload }) => {
 

@@ -1,7 +1,6 @@
 package com.recipefind.backend.controller;
 
 import com.recipefind.backend.entity.RecipeDTO;
-import com.recipefind.backend.service.RecipeService;
 import com.recipefind.backend.service.SaveRecipeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

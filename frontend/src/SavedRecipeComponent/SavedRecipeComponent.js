@@ -71,7 +71,7 @@ function SavedRecipeComponent () {
             navigate("/login");
             message.info("You must login first to see saved recipes");
         }
-    }, [user]);
+    }, [user, fetchSavedRecipe, navigate]);
 
     const truncateDescription = (description) => {
         if (description) {
@@ -85,7 +85,7 @@ function SavedRecipeComponent () {
     return (
         <Box className={"savedRecipeContainer"}>
             <Space wrap size="large" className={"cardContainer"}>
-                {recipes.map((recipe, index) => (
+                {recipes.map((recipe) => (
                     <Card
                         hoverable
                         className={"savedRecipeCard"}

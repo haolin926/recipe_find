@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import { Box, AppBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox } from "@mui/material";
 import { PlusOutlined } from "@ant-design/icons";
 import { FloatButton } from "antd";
 import "./IngredientComponent.css";
 
 const IngredientComponent = ({ ingredients, limitHeight }) => {
-    const ingredientList = ingredients ?? []; // Ensure ingredients is an array
+    const ingredientList = useMemo(() => ingredients ?? [], [ingredients]); // Ensure ingredients is an array
 
     const [rows, setRows] = useState([]);
 

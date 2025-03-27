@@ -10,7 +10,6 @@ import {useNavigate} from "react-router-dom";
 function ProfileComponent () {
     const { user, updateUser, updatePassword, loading } = useContext(AuthContext); // Get user & updateUser function
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -154,7 +153,7 @@ function ProfileComponent () {
                 </Button>
             </Card>
 
-            <Dialog className={"passwordDialog"}open={isDialogOpen} onClose={closeDialog}>
+            <Dialog className={"passwordDialog"} open={isDialogOpen} onClose={closeDialog}>
                 <DialogTitle>Change Password</DialogTitle>
                 {/* Password Change */}
                 <Card>

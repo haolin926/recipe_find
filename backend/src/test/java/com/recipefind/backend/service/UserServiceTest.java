@@ -281,9 +281,7 @@ public class UserServiceTest {
         when(passwordEncoder.matches(originalPassword, user.getPassword())).thenReturn(false);
 
         // Act & Assert
-        assertThrows(DataIntegrityViolationException.class, () -> {
-            userService.updatePassword(user, originalPassword, newPassword);
-        });
+        assertThrows(DataIntegrityViolationException.class, () -> userService.updatePassword(user, originalPassword, newPassword));
         verify(passwordEncoder, times(1)).matches(originalPassword, user.getPassword());
         verify(passwordEncoder, never()).encode(newPassword);
         verify(userRepository, never()).save(user);

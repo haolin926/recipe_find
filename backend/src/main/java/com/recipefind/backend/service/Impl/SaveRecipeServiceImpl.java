@@ -9,9 +9,10 @@ import com.recipefind.backend.service.SaveRecipeService;
 import com.recipefind.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,8 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
 
     private final UserService userService;
     private final SaveRecipeRepository saveRecipeRepository;
+    private Logger logger = LoggerFactory.getLogger(SaveRecipeServiceImpl.class);
+
     @Transactional
     @Override
     public Integer saveRecipeForUser(Integer userId, Recipe recipe) {
@@ -35,7 +38,7 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
             saveRecipeRepository.save(savedRecipeEntity);
             return savedRecipeEntity.getSavedRecipeId();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return null;
         }
     }
@@ -69,7 +72,7 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
             int deletedRows = saveRecipeRepository.deleteByUserIdAndRecipeId(userId, recipeId);
             return deletedRows > 0; // Returns true if delete was successful
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return false;
         }
     }

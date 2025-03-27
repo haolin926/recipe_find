@@ -7,7 +7,8 @@ import com.recipefind.backend.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.coyote.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ public class UserController {
     private final UserService userService;
 
     private final JwtUtil jwtUtil;
+
+    private Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
@@ -80,7 +83,7 @@ public class UserController {
             response.addCookie(cookie);
             return ResponseEntity.ok("Logged out successfully");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
         }
     }
@@ -119,10 +122,10 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password change failed.");
             }
         } catch (DataIntegrityViolationException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Original Password Incorrect");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
     }

@@ -8,7 +8,6 @@ import Box from "@mui/material/Box";
 import {useNavigate} from 'react-router-dom';
 import {AuthContext} from "../AuthContext";
 import {Avatar, Dropdown, message} from "antd";
-import "./headerBar.css";
 
 
 function ResponsiveAppBar({toggleDrawer}) {

@@ -4,7 +4,6 @@ import "./ResultListComponent.css";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
-import {FieldTimeOutlined} from "@ant-design/icons";
 
 
 const ResultListComponent = ({ searchResult }) => {
@@ -39,7 +38,22 @@ const ResultListComponent = ({ searchResult }) => {
                                                 <Avatar className="searchListImage" src={item.image} alt="Recipe Image" />
                                             </div>
                                         }
-                                        title={<a onClick={() => handleTitleClick(item)}>{item.name}</a>}
+                                        title={
+                                            <button
+                                                onClick={() => handleTitleClick(item)}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: 'blue',
+                                                    textDecoration: 'underline',
+                                                    cursor: 'pointer',
+                                                    padding: 0,
+                                                    font: 'inherit'
+                                                }}
+                                            >
+                                                {item.name}
+                                            </button>
+                                        }
                                         description={
                                             <div id="descriptionContainer">
 

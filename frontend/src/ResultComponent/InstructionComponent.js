@@ -1,8 +1,5 @@
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import {Accordion, AccordionDetails, AccordionSummary, ListItem} from "@mui/material";
-import {DownOutlined} from "@ant-design/icons";
 import Typography from "@mui/material/Typography";
 import React, {useState} from "react";
 import "./ResultComponent.css";

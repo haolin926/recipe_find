@@ -4,13 +4,15 @@ import com.recipefind.backend.dao.IngredientRepository;
 import com.recipefind.backend.entity.IngredientsEntity;
 import com.recipefind.backend.service.IngredientService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class IngredientServiceImpl implements IngredientService {
     private final IngredientRepository ingredientsRepository;
-
+    private Logger logger = LoggerFactory.getLogger(IngredientServiceImpl.class);
     @Override
     public IngredientsEntity findOrSaveIngredient(String ingredientName) {
         IngredientsEntity ingredient = ingredientsRepository.findByIngredientName(ingredientName);
@@ -18,11 +20,10 @@ public class IngredientServiceImpl implements IngredientService {
             ingredient = new IngredientsEntity();
             ingredient.setIngredientName(ingredientName);
             try {
-                IngredientsEntity savedIngredient = ingredientsRepository.save(ingredient);
-                return savedIngredient;
+                return ingredientsRepository.save(ingredient);
             } catch (Exception e)
             {
-                e.printStackTrace();
+                logger.error(e.getMessage());
                 return null;
             }
         } else {

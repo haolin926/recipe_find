@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
 import Box from "@mui/material/Box";
-import {TextField} from "@mui/material";
 import Button from "@mui/material/Button";
 import {Input, Tag} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
@@ -45,7 +44,7 @@ const SearchByIngredientComponent = ({onSearchByIngredients}) => {
     return (
         <Box className={"searchIngredientContainer"}>
             <Box className={"tagContainer"}>
-                {tags.map((tag, index) => {
+                {tags.map((tag) => {
                     return (
                         <Tag
                             key={tag}

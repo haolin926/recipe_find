@@ -8,6 +8,8 @@ import com.recipefind.backend.service.RecipeService;
 import com.recipefind.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final RecipeService recipeService;
     private final UserService userService;
+    private final Logger logger = LoggerFactory.getLogger(CommentServiceImpl.class);
 
     @Override
     @Transactional
@@ -52,7 +55,9 @@ public class CommentServiceImpl implements CommentService {
             if (savedComment.getCommentId() != null) {
 
                 if (commentDTO.getRate() != 0.0) {
-                    recipeService.updateRecipeRate(recipeId, commentDTO.getRate());
+                    if(!recipeService.updateRecipeRate(recipeId, commentDTO.getRate())) {
+                        throw new RuntimeException("Failed to update recipe rate!");
+                    };
                 }
 
                 return savedComment.getCommentId();
@@ -60,7 +65,7 @@ public class CommentServiceImpl implements CommentService {
                 throw new RuntimeException("Failed to save comment!");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return null;
         }
     }

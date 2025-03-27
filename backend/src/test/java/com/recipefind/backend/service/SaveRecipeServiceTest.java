@@ -66,9 +66,7 @@ public class SaveRecipeServiceTest {
         Recipe recipe = new Recipe();
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
-            saveRecipeService.saveRecipeForUser(1, recipe);
-        });
+        assertThrows(RuntimeException.class, () -> saveRecipeService.saveRecipeForUser(1, recipe));
         verify(userService, times(1)).getUserById(1);
         verify(saveRecipeRepository, never()).save(any(SavedRecipeEntity.class));
     }
@@ -109,9 +107,7 @@ public class SaveRecipeServiceTest {
         when(userService.getUserById(1)).thenReturn(null);
 
         // Act & Assert
-        Exception exception = assertThrows(Exception.class, () -> {
-            saveRecipeService.findByUser(1);
-        });
+        Exception exception = assertThrows(Exception.class, () -> saveRecipeService.findByUser(1));
         assertEquals("User Not Found", exception.getMessage());
         verify(userService, times(1)).getUserById(1);
         verify(saveRecipeRepository, never()).findByUser(any(User.class));
@@ -141,9 +137,7 @@ public class SaveRecipeServiceTest {
         when(userService.getUserById(1)).thenReturn(null);
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            saveRecipeService.deleteSavedRecipe(1, 1);
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> saveRecipeService.deleteSavedRecipe(1, 1));
         assertEquals("User not found", exception.getMessage());
         verify(userService, times(1)).getUserById(1);
         verify(saveRecipeRepository, never()).deleteByUserIdAndRecipeId(anyInt(), anyInt());

@@ -5,7 +5,6 @@ import com.recipefind.backend.entity.MealPlanEntity;
 import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.entity.MealPlanWeeklySummaryDTO;
 import java.util.Date;
-import java.util.List;
 
 public interface MealPlanService {
     MealPlanDTO getMealPlanForUserOnDate (Integer userId, Date date) throws Exception;

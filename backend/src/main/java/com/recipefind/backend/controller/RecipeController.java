@@ -2,11 +2,12 @@ package com.recipefind.backend.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.recipefind.backend.entity.Prediction;
 import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.entity.PredictResult;
 import com.recipefind.backend.service.RecipeService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,8 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
+
+    private static final Logger logger = LoggerFactory.getLogger(RecipeController.class);;
 
     @GetMapping("/name")
     public ResponseEntity<List<RecipeDTO>> getRecipeByName(@RequestParam("queryName") String queryName) {
@@ -68,7 +71,7 @@ public class RecipeController {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -199,7 +199,7 @@ const ResultComponent = () => {
         fetchRecipeById();
         fetchRecipeComments();
 
-    }, [recipeId, location.state]);
+    }, [recipeId, location.state, defaultRecipe, fetchRecipeComments, navigate]);
 
     const handleLoginModalCancel = () => {
         setLoginModalVisible(false);

@@ -11,6 +11,8 @@ import com.recipefind.backend.utils.FractionConverter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
@@ -55,9 +57,8 @@ public class RecipeServiceImpl implements RecipeService {
     private static final long RETRY_DELAY = 500; // 500 ms delay
     private static final String GOOGLE_VISION_URL = "https://vision.googleapis.com/v1/images:annotate?key=";
     private static final String SPOONACULAR_PARSE_INGREDIENT_URL = "https://api.spoonacular.com/recipes/parseIngredients?apiKey=";
-
     private static final String SPOONACULAR_FIND_RECIPE_BY_INGREDIENT_URL = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=";
-
+    private final Logger logger = LoggerFactory.getLogger(RecipeServiceImpl.class);
     @Override
     public List<RecipeDTO> findRecipesByName(String queryName) throws JsonProcessingException {
         String url = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey + "&query=" + queryName + "&instructionsRequired=true&addRecipeInstructions=true&addRecipeNutrition=true&number=10";
@@ -379,7 +380,7 @@ public class RecipeServiceImpl implements RecipeService {
             return ingredient.has("id");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return false;
         }
     }
@@ -522,7 +523,7 @@ public class RecipeServiceImpl implements RecipeService {
             recipeRepository.save(recipe);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return false;
         }
     }

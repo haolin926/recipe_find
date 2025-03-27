@@ -61,9 +61,6 @@ public class RecipeServiceTest {
     private GptService gptService;
 
     @Mock
-    private CommentRepository commentRepository;
-
-    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -375,17 +372,18 @@ public class RecipeServiceTest {
         MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", imageBytes);
 
         // Mock the response from Google Vision API (mocking the REST call)
-        String googleVisionResponse = "{\n" +
-                "  \"responses\": [\n" +
-                "    {\n" +
-                "      \"labelAnnotations\": [\n" +
-                "        { \"description\": \"Tomato\", \"score\": 0.8 },\n" +
-                "        { \"description\": \"Carrot\", \"score\": 0.6 },\n" +
-                "        { \"description\": \"Computer\", \"score\": 0.1 }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
+        String googleVisionResponse = """
+                {
+                  "responses": [
+                    {
+                      "labelAnnotations": [
+                        { "description": "Tomato", "score": 0.8 },
+                        { "description": "Carrot", "score": 0.6 },
+                        { "description": "Computer", "score": 0.1 }
+                      ]
+                    }
+                  ]
+                }""";
 
         JsonNode responseNode = new ObjectMapper().readTree(googleVisionResponse);
 
@@ -417,16 +415,17 @@ public class RecipeServiceTest {
         MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", imageBytes);
 
         // Mock the response from Google Vision API (mocking the REST call)
-        String googleVisionResponse = "{\n" +
-                "  \"responses\": [\n" +
-                "    {\n" +
-                "      \"labelAnnotations\": [\n" +
-                "        { \"description\": \"Computer\", \"score\": 0.1 },\n" +
-                "        { \"description\": \"Phone\", \"score\": 0.2 }\n" +
-                "      ]\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
+        String googleVisionResponse = """
+                {
+                  "responses": [
+                    {
+                      "labelAnnotations": [
+                        { "description": "Computer", "score": 0.1 },
+                        { "description": "Phone", "score": 0.2 }
+                      ]
+                    }
+                  ]
+                }""";
 
         JsonNode responseNode = new ObjectMapper().readTree(googleVisionResponse);
 
@@ -448,7 +447,7 @@ public class RecipeServiceTest {
     }
 
     @Test
-    void testLabelIngredients_withRetriesAndErrorHandling() throws Exception {
+    void testLabelIngredients_withRetriesAndErrorHandling() {
         // Mocking the image data
         byte[] imageBytes = "fake image data".getBytes();
         MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", imageBytes);

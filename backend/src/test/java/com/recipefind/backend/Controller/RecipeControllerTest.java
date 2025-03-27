@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recipefind.backend.controller.RecipeController;
 import com.recipefind.backend.entity.PredictResult;
 import com.recipefind.backend.entity.Prediction;
-import com.recipefind.backend.entity.Recipe;
 import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.service.RecipeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -209,7 +208,6 @@ public class RecipeControllerTest {
     public void searchRecipeByIngredients_NotFound_ShouldReturn404() throws Exception {
         // Arrange
         List<String> ingredients = List.of("tomato", "cheese");
-        List<RecipeDTO> recipes = new ArrayList<>();
 
         when(recipeService.findRecipesByIngredients(ingredients)).thenReturn(null);
 

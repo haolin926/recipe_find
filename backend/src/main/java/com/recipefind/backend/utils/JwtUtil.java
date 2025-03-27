@@ -1,5 +1,7 @@
 package com.recipefind.backend.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -12,6 +14,7 @@ import java.util.Date;
 public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
+    private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
     public String generateToken(Long userId) {
         return Jwts
@@ -32,7 +35,7 @@ public class JwtUtil {
             return extractUserId(token) != null && !isTokenExpired(token);
         } catch (Exception e)
         {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return false;
         }
     }

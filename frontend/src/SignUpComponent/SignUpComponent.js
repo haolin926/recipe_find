@@ -137,7 +137,7 @@ function SignUpComponent () {
                             Submit
                         </Button>
                     </Form.Item>
-                    <Link href="/login">Got account already? Click here to login</Link>
+                    <Link href={"/login"}>Got account already? Click here to login</Link>
                 </Form>
             </Paper>
         </Box>

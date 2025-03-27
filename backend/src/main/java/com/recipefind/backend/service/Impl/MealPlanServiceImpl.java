@@ -9,6 +9,8 @@ import com.recipefind.backend.service.RecipeService;
 import com.recipefind.backend.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -28,7 +30,7 @@ public class MealPlanServiceImpl implements MealPlanService {
     private final MealPlanRepository mealPlanRepository;
     private final RecipeService recipeService;
     private final MealPlanRecipeRepository mealPlanRecipeRepository;
-
+    private final Logger logger = LoggerFactory.getLogger(MealPlanServiceImpl.class);
 
     @Override
     public MealPlanDTO getMealPlanForUserOnDate (Integer userId, Date date) throws Exception {
@@ -45,7 +47,7 @@ public class MealPlanServiceImpl implements MealPlanService {
                }
 
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
                 return null;
             }
         }

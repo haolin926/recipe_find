@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.recipefind.backend.entity.RecipeDTO;
 import com.recipefind.backend.service.GptService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ public class GptServiceImpl implements GptService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final Logger logger = LoggerFactory.getLogger(GptServiceImpl.class);
 
     @Override
     public List<RecipeDTO> constructRecipeDescription(List<RecipeDTO> recipes) {
@@ -96,7 +99,7 @@ public class GptServiceImpl implements GptService {
             }
             return recipes;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return recipes;
         }
     }
@@ -118,9 +121,7 @@ public class GptServiceImpl implements GptService {
                         "Return a JSON object where each word maps to its category."));
 
         // Construct the user query
-        StringBuilder userQuery = new StringBuilder("Classify the following words: ");
-        userQuery.append(String.join(", ", words));
-        messages.add(Map.of("role", "user", "content", userQuery.toString()));
+        messages.add(Map.of("role", "user", "content", "Classify the following words: " + String.join(", ", words)));
 
         requestBody.put("messages", messages);
         requestBody.put("max_tokens", 200); // Limit response length
@@ -148,7 +149,7 @@ public class GptServiceImpl implements GptService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
 
         return validatedItems;

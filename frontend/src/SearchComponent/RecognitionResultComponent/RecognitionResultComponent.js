@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import "./RecognitionResultComponent.css";
 import {Link, Paper} from "@mui/material";
-import {Button, Tag, Typography, Divider, Flex, Progress} from 'antd'
+import {Button, Tag, Typography, Flex, Progress} from 'antd'
 import React from 'react';
 import AppBar from "@mui/material/AppBar";
 

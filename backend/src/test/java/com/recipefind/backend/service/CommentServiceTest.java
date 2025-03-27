@@ -120,6 +120,41 @@ public class CommentServiceTest {
     }
 
     @Test
+    void testSaveComment_UpdateRecipeRateFail() throws JsonProcessingException {
+        // Given
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setRecipeApiId(1);
+        commentDTO.setUserId(1);
+        commentDTO.setComment("Great recipe!");
+        commentDTO.setImages(Collections.emptyList());
+        commentDTO.setRate(5.0f);
+
+        Recipe recipe = new Recipe();
+        recipe.setRecipeId(1L);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
+        Comment comment = new Comment();
+        comment.setCommentId(1);
+        comment.setUserId(1);
+        comment.setCommentContent("Great recipe!");
+        comment.setImages(Collections.emptyList());
+        comment.setRecipeId(1);
+        comment.setRate(5.0f);
+
+        when(userService.getUserById(1)).thenReturn(user);
+        when(recipeService.findRecipeByApiId(1)).thenReturn(recipe);
+        when(commentRepository.save(any(Comment.class))).thenReturn(comment);
+        when(recipeService.updateRecipeRate(1L, 5.0f)).thenReturn(false);
+
+        // When / Then
+        Integer result = commentService.saveComment(commentDTO);
+        assertNull(result);
+    }
+
+    @Test
     void testGetCommentsForRecipe_Success() {
         // Given
         Integer recipeApiId = 1;
