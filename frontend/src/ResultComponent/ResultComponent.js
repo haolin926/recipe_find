@@ -42,6 +42,7 @@ const ResultComponent = () => {
 
     const [comments, setComments] = useState([]);
 
+    // eslint-disable-next-line no-unused-vars
     const [commentsLoading, setCommentsLoading] = useState(false);
 
     const [newComment, setNewComment] = useState("");
@@ -150,7 +151,7 @@ const ResultComponent = () => {
         } finally {
             setCommentsLoading(false);
         }
-    });
+    }, [recipeId, navigate]);
 
 
     useEffect(() => {
