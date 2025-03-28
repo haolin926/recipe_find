@@ -92,15 +92,9 @@ function SavedRecipeComponent () {
                         className={"savedRecipeCard"}
                         cover={
                         <div className={"cardImageContainer"}>
-                            <div role="button" tabIndex={0} onClick={() => handleImageClick(recipe)}
-                                 onKeyDown={(e) => {
-                                     if (e.key === 'Enter' || e.key === ' ') {
-                                         handleImageClick(recipe);
-                                     }
-                                 }}
-                                 aria-label={`Click to view details of recipe: ${recipe.name}`}>
+                            <button className={"cardImageContainer"} onClick={() => handleImageClick(recipe)} aria-label={`Click to view details of recipe: ${recipe.name}`}>
                                 <img className="cardImage" alt={`savedRecipeImage-${recipe.name}`} src={recipe.image} />
-                            </div>
+                            </button>
                         </div>
                         }
                         actions={[
