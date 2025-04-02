@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import * as React from "react";
-import {Card, message, Space} from "antd";
+import {Card, message, Space, Spin} from "antd";
 import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import "./SavedRecipeComponent.css";
 import axios from "axios";
@@ -9,7 +9,7 @@ import {AuthContext} from "../AuthContext";
 import {useNavigate} from "react-router-dom";
 
 function SavedRecipeComponent () {
-    const { user } = useContext(AuthContext);
+    const { user, loading } = useContext(AuthContext);
     const navigate = useNavigate();
     const [recipes, setRecipes] = useState([]);
     const fetchSavedRecipe = useCallback(async () => {
@@ -64,6 +64,8 @@ function SavedRecipeComponent () {
     };
 
     useEffect(() => {
+        if (loading) return;
+
         if (user) {
             // Call fetchSavedRecipe only if user is logged in
             fetchSavedRecipe();
@@ -82,6 +84,10 @@ function SavedRecipeComponent () {
         }
     };
 
+    if (loading) {
+        return <Spin size="large" style={{ display: "block", margin: "auto" }} />;
+    }
+
     return (
         <Box className={"savedRecipeContainer"}>
             <Space wrap size="large" className={"cardContainer"}>
@@ -92,9 +98,9 @@ function SavedRecipeComponent () {
                         className={"savedRecipeCard"}
                         cover={
                         <div className={"cardImageContainer"}>
-                            <button className={"cardImageContainer"} onClick={() => handleImageClick(recipe)} aria-label={`Click to view details of recipe: ${recipe.name}`}>
+                            <div className={"cardImageContainer"} onClick={() => handleImageClick(recipe)} aria-label={`Click to view details of recipe: ${recipe.name}`}>
                                 <img className="cardImage" alt={`savedRecipeImage-${recipe.name}`} src={recipe.image} />
-                            </button>
+                            </div>
                         </div>
                         }
                         actions={[

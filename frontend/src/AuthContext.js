@@ -35,7 +35,7 @@ export const AuthProvider = ({children}) => {
                 return { success: true };
             }
         } catch (error) {
-            if (error.response.status === 401) {
+            if ((error.response.status !== undefined) && error.response.status === 401) {
                 return { success: false, message: "Invalid Username/Password" };
             } else {
                 return { success: false, message: "Server error, unable to login" };

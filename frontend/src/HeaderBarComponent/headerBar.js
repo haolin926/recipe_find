@@ -65,7 +65,7 @@ function ResponsiveAppBar({toggleDrawer}) {
                                 Recipe Search
                             </Typography>
                         </Box>
-                        <Box sx={{marginRight:"10px"}}>
+                        <Box className={"headerButtonBox"}>
                         {user != null ? (
                             <Dropdown menu={{items}} trigger={["click"]} overlayStyle={{ zIndex: 1301 }}>
                                 <Avatar

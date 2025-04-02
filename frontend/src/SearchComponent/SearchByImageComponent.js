@@ -2,6 +2,7 @@ import {Button, styled} from "@mui/material";
 import React from "react";
 import Box from "@mui/material/Box";
 import PropTypes from "prop-types";
+import {UploadOutlined} from "@ant-design/icons";
 
 const SearchByImageComponent = ({ onImageUpload }) => {
 
@@ -24,6 +25,7 @@ const SearchByImageComponent = ({ onImageUpload }) => {
                 role={undefined}
                 variant="contained"
                 tabIndex={-1}
+                startIcon={<UploadOutlined />}
                 className={"customButton"}
                 size={"large"}
             >

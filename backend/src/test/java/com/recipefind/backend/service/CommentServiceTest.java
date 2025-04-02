@@ -70,7 +70,7 @@ public class CommentServiceTest {
         when(userService.getUserById(1)).thenReturn(user);
         when(recipeService.findRecipeByApiId(1)).thenReturn(recipe);
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
-
+        when(recipeService.updateRecipeRate(1L, 5.0f)).thenReturn(true);
         // When
         Integer result = commentService.saveComment(commentDTO);
 

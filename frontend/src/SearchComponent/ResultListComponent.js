@@ -5,6 +5,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
 import PropTypes from "prop-types";
+import {Link} from "@mui/material";
 
 
 const ResultListComponent = ({ searchResult }) => {
@@ -40,20 +41,7 @@ const ResultListComponent = ({ searchResult }) => {
                                             </div>
                                         }
                                         title={
-                                            <button
-                                                onClick={() => handleTitleClick(item)}
-                                                style={{
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    color: 'blue',
-                                                    textDecoration: 'underline',
-                                                    cursor: 'pointer',
-                                                    padding: 0,
-                                                    font: 'inherit'
-                                                }}
-                                            >
-                                                {item.name}
-                                            </button>
+                                            <Link className={"ResultRecipeTitle"} onClick={() => handleTitleClick(item)}>{item.name}</Link>
                                         }
                                         description={
                                             <div id="descriptionContainer">
@@ -112,7 +100,7 @@ const ResultListComponent = ({ searchResult }) => {
 ResultListComponent.propTypes = {
     searchResult: PropTypes.arrayOf(
         PropTypes.shape({
-            id: PropTypes.number.isRequired,
+            id: PropTypes.number,
             name: PropTypes.string.isRequired,
             image: PropTypes.string,
             description: PropTypes.string,

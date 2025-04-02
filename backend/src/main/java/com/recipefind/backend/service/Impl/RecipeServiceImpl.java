@@ -8,6 +8,7 @@ import com.recipefind.backend.dao.RecipeRepository;
 import com.recipefind.backend.entity.*;
 import com.recipefind.backend.service.*;
 import com.recipefind.backend.utils.FractionConverter;
+import com.recipefind.backend.utils.CapitalizeStringUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -43,6 +44,20 @@ public class RecipeServiceImpl implements RecipeService {
             "Fat",
             "Carbohydrates",
             "Protein"
+    );
+    private final static List<String> unWantIngredientList= List.of(
+            "Food",
+            "Roasting",
+            "Fast food",
+            "Meat",
+            "Dish",
+            "Dinner",
+            "Lunch",
+            "Breakfast",
+            "Cuisine",
+            "Grilling",
+            "Barbecue",
+            "Leaf vegetable"
     );
     private final CommentRepository commentRepository;
     @Setter
@@ -272,10 +287,11 @@ public class RecipeServiceImpl implements RecipeService {
                 for(JsonNode predictedResult : predictedResults) {
                     Prediction result = new Prediction();
                     String name = predictedResult.path("dish_name").asText().replace("_", " ");
+                    String capitalizedName = CapitalizeStringUtil.capitalizeString(name);
                     float probability = predictedResult.path("probability").floatValue();
 
-                    if(probability > 0) {
-                        result.setName(name);
+                    if(probability > 0.01) {
+                        result.setName(capitalizedName);
                         result.setProbability(probability);
                         predictedNames.add(result);
                     }
@@ -324,7 +340,7 @@ public class RecipeServiceImpl implements RecipeService {
                         for (JsonNode label : labels) {
                             double score = label.path("score").asDouble(0.0);
 
-                            if (score > 0.5) {
+                            if (score > 0.7) {
 
                                 String labelName = label.path("description").asText();
                                 boolean isIngredient = isIngredient(labelName);
@@ -391,7 +407,12 @@ public class RecipeServiceImpl implements RecipeService {
             List<Prediction> predictName = predictName(image);
 
             List<String> ingredients = labelIngredients(image);
+            System.out.println("Detected ingredients: " + ingredients);
+
             List<String> filteredIngredients = gptService.validateFoodItems(ingredients);
+            filteredIngredients.removeIf(unWantIngredientList::contains);
+            System.out.println("Filtered ingredients: " + filteredIngredients);
+
             PredictResult predictResult = new PredictResult();
             predictResult.setPredictName(predictName);
             predictResult.setDetectedIngredients(filteredIngredients);

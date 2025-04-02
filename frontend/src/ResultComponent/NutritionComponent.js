@@ -5,7 +5,6 @@ import {PieChart} from "@mui/x-charts/PieChart";
 import React from "react";
 import "./ResultComponent.css";
 import "./NutritionComponent.css";
-import {Carousel} from "antd";
 import PropTypes from "prop-types";
 
 const NutritionComponent = ({nutrition}) => {
@@ -28,37 +27,28 @@ const NutritionComponent = ({nutrition}) => {
                 </Box>
                 <Box className={"resultInfoContainer nutritionPaperContainer"} >
                     <Paper elevation={3} className={"nutritionPaper"}>
-                        {nutritionList.length > 0 ? ( // Ensure nutrition is not null and has items
-                        <Carousel dots={{className: "greyDots carouselDots"}} style={{height:"100%"}}>
+                        {nutritionList.length > 0 ? (
                             <div>
-                                <div className="carouselItem">
-                                <PieChart
-                                    series={[
-                                        {
-                                            data: pieData,
-                                            innerRadius: 50,
-                                            outerRadius: 100,
-                                            paddingAngle: 5,
-                                            highlightScope: { fade: 'global', highlight: 'item' },
-                                            faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
-                                        },
-                                    ]}
-                                    width={500}
-                                    height={300}
-                                    sx={{margin:"20px"}}
-                                />
+                                <div>
+                                    <div className="carouselItem">
+                                    <PieChart
+                                        series={[
+                                            {
+                                                data: pieData,
+                                                innerRadius: 50,
+                                                outerRadius: 100,
+                                                paddingAngle: 5,
+                                                highlightScope: { fade: 'global', highlight: 'item' },
+                                                faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                                            },
+                                        ]}
+                                        width={500}
+                                        height={300}
+                                        sx={{margin:"20px"}}
+                                    />
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <h3>2</h3>
-                            </div>
-                            <div>
-                                <h3>3</h3>
-                            </div>
-                            <div className={"carouselItem"}>
-                                <h3>4</h3>
-                            </div>
-                        </Carousel>
                             ) : (
                                 <h3 style={{textAlign: "center", margin: "auto"}}>No nutrition data available</h3>
                             )}

@@ -101,6 +101,7 @@ public class Recipe {
                     nutritionDTO.setId(recipeNutritionEntity.getNutritionEntity().getNutritionId());
                     nutritionDTO.setName(recipeNutritionEntity.getNutritionEntity().getNutritionName());
                     nutritionDTO.setAmount(recipeNutritionEntity.getAmount().toString());
+                    nutritionDTO.setUnit(recipeNutritionEntity.getUnit());
 
                     return nutritionDTO;
                 })

@@ -75,7 +75,7 @@ const SearchByIngredientComponent = ({onSearchByIngredients}) => {
                     </Tag>
                 )}
             </Box>
-            <Button className="customButton" type="text" size="large" onClick={handleSearch}>Submit</Button>
+            <Button className="customButton" type="text" size="large" onClick={handleSearch}>Search</Button>
         </Box>
     );
 };

@@ -28,7 +28,7 @@ const SearchByNameComponent = ({onSearchByName}) => {
                     value={recipeName}
                     onChange={handleInputChange}
                 />
-                <Button className="customButton" type="text" size="large" onClick={handleSubmit}>Submit</Button>
+                <Button className="customButton" type="text" size="large" onClick={handleSubmit}>Search</Button>
             </Box>
     );
 };

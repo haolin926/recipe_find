@@ -31,7 +31,7 @@ import "./MealPlanComponent.css";
 export default function MealPlanComponent() {
 
     const [selectedDate, setSelectedDate] = useState(() => dayjs());
-    const { user } = useContext(AuthContext);
+    const { user, loading } = useContext(AuthContext);
     const [MealPlan, setMealPlan] = useState([]);
     const [weeklySummary, setWeeklySummary] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -66,6 +66,8 @@ export default function MealPlanComponent() {
     }, [user, selectedDate, navigate]);
     
     useEffect(() => {
+        if (loading) return;
+
         if (user) {
             // Call fetchSavedRecipe only if user is logged in
             fetchMealPlanForCurrentDate();
@@ -132,9 +134,6 @@ export default function MealPlanComponent() {
                         onChange={(newValue) => setSelectedDate(newValue)}
                     />
                 </LocalizationProvider>
-                <Button variant="contained">
-                    Add New Recipe
-                </Button>
             </Box>
             <Box className={"showWeeklySummaryButtonContainer"}>
                 <Button variant="outlined" onClick={getWeeklySummary}>
@@ -145,7 +144,7 @@ export default function MealPlanComponent() {
                 <Box className="mealPlanInfoContainer">
                     <Box>
                         <AppBar position="static" className={"commonHeader"}>
-                            <h1>Saved Recipes</h1>
+                            <h1>Planned Recipes</h1>
                         </AppBar>
                     </Box>
                     <Paper className={"savedRecipePaper"}>

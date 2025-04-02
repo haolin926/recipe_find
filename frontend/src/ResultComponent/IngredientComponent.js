@@ -1,7 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import { Box, AppBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Checkbox } from "@mui/material";
-import { PlusOutlined } from "@ant-design/icons";
-import { FloatButton } from "antd";
+import { Box, AppBar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import "./IngredientComponent.css";
 import PropTypes from "prop-types";
 
@@ -23,23 +21,6 @@ const IngredientComponent = ({ ingredients, limitHeight }) => {
         setRows(prevRows => (JSON.stringify(prevRows) === JSON.stringify(newRows) ? prevRows : newRows));
     }, [ingredientList]);
 
-    const handleCheckboxChange = (id) => {
-        setRows((prevRows) =>
-            prevRows.map((row) =>
-                row.id === id ? { ...row, selected: !row.selected } : row
-            )
-        );
-    };
-
-    const handleSelectAll = (event) => {
-        const isChecked = event.target.checked;
-        setRows((prevRows) =>
-            prevRows.map((row) => ({ ...row, selected: isChecked }))
-        );
-    };
-
-    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
-
     return (
         <Box className={`bottomContainerPaper ${limitHeight ? 'limitedHeight' : ''}`} sx={{position:"relative"}}>
             <Box sx={{ width: "100%" }}>
@@ -52,27 +33,14 @@ const IngredientComponent = ({ ingredients, limitHeight }) => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell padding="checkbox">
-                                    <Checkbox
-                                        checked={allSelected}
-                                        onChange={handleSelectAll}
-                                        disabled={rows.length === 0} // Disable if no ingredients
-                                    />
-                                </TableCell>
-                                <TableCell>Ingredient</TableCell>
-                                <TableCell>Amount</TableCell>
+                                <TableCell className={"tableHeadCell"}>Ingredient</TableCell>
+                                <TableCell className={"tableHeadCell"}>Amount</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {rows.length > 0 ? (
                                 rows.map((row) => (
                                     <TableRow key={row.id}>
-                                        <TableCell padding="checkbox">
-                                            <Checkbox
-                                                checked={row.selected}
-                                                onChange={() => handleCheckboxChange(row.id)}
-                                            />
-                                        </TableCell>
                                         <TableCell>{row.name}</TableCell>
                                         <TableCell>{`${row.amount} ${row.unit}`}</TableCell>
                                     </TableRow>
@@ -87,13 +55,6 @@ const IngredientComponent = ({ ingredients, limitHeight }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <FloatButton
-                    className={"addToShoppingButton"}
-                    tooltip={<div>Add Selected Ingredient To Shopping List</div>}
-                    icon={<PlusOutlined />}
-                    type={"primary"}
-                    disabled={rows.length === 0} // Disable if no ingredients
-                />
             </Box>
         </Box>
     );

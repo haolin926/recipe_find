@@ -21,6 +21,9 @@
     font-size: 14px;
     padding: 3px 9px;
 }
+.ResultRecipeTitle {
+    text-decoration: none ! important;
+}
 .description {
     max-height: 4.5em;
     line-height: 1.5em;

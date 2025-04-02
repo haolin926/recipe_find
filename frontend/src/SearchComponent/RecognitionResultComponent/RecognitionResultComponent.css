@@ -34,10 +34,10 @@
     display: flex;
     width:50%;
     height:100%;
-    max-height: 100%;
+    max-height: 700px;
     justify-content: center;
     align-items: center;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 .predictResult{
     width:96%;
