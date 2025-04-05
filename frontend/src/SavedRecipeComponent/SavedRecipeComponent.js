@@ -97,11 +97,19 @@ function SavedRecipeComponent () {
                         hoverable
                         className={"savedRecipeCard"}
                         cover={
-                        <div className={"cardImageContainer"}>
-                            <div className={"cardImageContainer"} onClick={() => handleImageClick(recipe)} aria-label={`Click to view details of recipe: ${recipe.name}`}>
+                            <div
+                                className={"cardImageContainer"}
+                                onClick={() => handleImageClick(recipe)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        handleImageClick(recipe);
+                                    }
+                                }}
+                                tabIndex={0}
+                                aria-label={`Click to view details of recipe: ${recipe.name}`}
+                            >
                                 <img className="cardImage" alt={`savedRecipeImage-${recipe.name}`} src={recipe.image} />
                             </div>
-                        </div>
                         }
                         actions={[
                             <EditOutlined key={`edit-${recipe.id}`} onClick={() => handleImageClick(recipe)}></EditOutlined>,
