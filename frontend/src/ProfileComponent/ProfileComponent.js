@@ -10,7 +10,6 @@ function ProfileComponent () {
     const { user, updateUser, updatePassword, loading } = useContext(AuthContext); // Get user & updateUser function
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [formData, setFormData] = useState({
-        username: "",
         email: "",
         userPhoto: "",
         password: "",
@@ -132,11 +131,7 @@ function ProfileComponent () {
                     <br />
                     <Button icon={<UploadOutlined />}>Upload Profile Photo</Button>
                 </Upload>
-
-                <Form layout="vertical" style={{ marginTop: 20 }}>
-                    <Form.Item label="Username">
-                        <Input name="username" value={formData.username} onChange={handleInputChange} />
-                    </Form.Item>
+                <Form layout="vertical" className={"registerForm"}>
 
                     <Form.Item label="Email">
                         <Input name="email" type="email" value={formData.email} onChange={handleInputChange} />

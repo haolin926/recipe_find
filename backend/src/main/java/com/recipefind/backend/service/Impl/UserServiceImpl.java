@@ -26,16 +26,22 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Boolean createUser(UserDTO userDTO) {
         User user = new User();
+        user.setUserPhoto(userDTO.getUserPhoto());
         user.setUsername(userDTO.getUsername());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setEmail(userDTO.getEmail());
 
         try {
+            User isUserExists = userRepository.findByUsername(userDTO.getUsername());
+            if (isUserExists != null) {
+                throw new DataIntegrityViolationException("User already exists");
+            }
+
             User saveduser = userRepository.save(user);
-            System.out.println(saveduser.getId());
             return saveduser.getId() != null;
-        } catch (DataAccessException e) {
+        } catch (DataIntegrityViolationException e) {
             logger.error("Database error while saving user: {}", e.getMessage());
+            throw new DataIntegrityViolationException("User already exists");
         } catch (Exception e) {
             logger.error("Unexpected error while saving user: {}", e.getMessage());
         }
@@ -62,9 +68,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateUser(User user, UserDTO userDTO) {
-        if (userDTO.getUsername() != null) {
-            user.setUsername(userDTO.getUsername());
-        }
         if (userDTO.getEmail() != null) {
             user.setEmail(userDTO.getEmail());
         }

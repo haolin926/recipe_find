@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,7 @@ public class SaveRecipeServiceTest {
         savedRecipeEntity.setUser(user);
 
         when(userService.getUserById(1)).thenReturn(user);
+        when(saveRecipeService.isRecipeSavedByUser(user, recipe)).thenReturn(false);
         when(saveRecipeRepository.save(any(SavedRecipeEntity.class))).thenReturn(savedRecipeEntity);
 
         // Act
@@ -57,6 +59,22 @@ public class SaveRecipeServiceTest {
         assertEquals(0, result);
         verify(userService, times(1)).getUserById(1);
         verify(saveRecipeRepository, times(1)).save(any(SavedRecipeEntity.class));
+    }
+
+    @Test
+    void testSaveRecipeForUser_RecipeAlreadySaved() {
+        // Arrange
+        User user = new User();
+        user.setId(1L);
+        Recipe recipe = new Recipe();
+
+        when(userService.getUserById(1)).thenReturn(user);
+        when(saveRecipeService.isRecipeSavedByUser(user, recipe)).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> saveRecipeService.saveRecipeForUser(1, recipe));
+        verify(userService, times(1)).getUserById(1);
+        verify(saveRecipeRepository, never()).save(any(SavedRecipeEntity.class));
     }
 
     @Test

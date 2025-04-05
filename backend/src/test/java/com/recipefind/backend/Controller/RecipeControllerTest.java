@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -62,7 +63,7 @@ public class RecipeControllerTest {
     }
 
     @Test
-    public void getRecipeByName_NotFound_ShouldReturn404() throws Exception {
+    public void getRecipeByName_NotFound_ShouldReturn200() throws Exception {
         // Arrange
         List<RecipeDTO> recipes = new ArrayList<>();
 
@@ -72,7 +73,7 @@ public class RecipeControllerTest {
         mockMvc.perform(get("/api/recipe/name")
                         .param("queryName", "Test")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -106,6 +107,20 @@ public class RecipeControllerTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(predictResult)));
+    }
+
+    @Test
+    public void getRecipeByImage_NullReturned_ShouldReturn200() throws Exception {
+        // Arrange
+        MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "test image content".getBytes());
+
+        when(recipeService.imagePrediction(image)).thenReturn(null);
+
+        // Act
+        mockMvc.perform(multipart("/api/recipe/image")
+                        .file(image)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -153,6 +168,18 @@ public class RecipeControllerTest {
     }
 
     @Test
+    public void getRecipeById_InternalServerError_ShouldReturn500() throws Exception {
+        // Arrange
+        when(recipeService.findRecipeInSpoonacularByApiId(1)).thenThrow(new RuntimeException("Simulated server error"));
+
+        // Act
+        mockMvc.perform(get("/api/recipe/id")
+                        .param("queryId", "1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     public void saveRecipe_ShouldReturnOk() throws Exception {
         // Arrange
         RecipeDTO recipe = new RecipeDTO();
@@ -171,6 +198,23 @@ public class RecipeControllerTest {
     }
 
     @Test
+    public void saveRecipe_NullReturned_ShouldReturn500() throws Exception {
+        // Arrange
+        RecipeDTO recipe = new RecipeDTO();
+        recipe.setId(1);
+        recipe.setName("test recipe");
+
+        when(recipeService.saveFavouriteRecipe(recipe, 1)).thenReturn(null);
+
+        // Act
+        mockMvc.perform(post("/api/recipe/save")
+                        .param("userId", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recipe)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     public void saveRecipe_InternalServerError_ShouldReturn500() throws Exception {
         // Arrange
         RecipeDTO recipe = new RecipeDTO();
@@ -185,6 +229,23 @@ public class RecipeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(recipe)))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void saveRecipe_RecipeAlreadyExist_ShouldReturn409() throws Exception {
+        // Arrange
+        RecipeDTO recipe = new RecipeDTO();
+        recipe.setId(1);
+        recipe.setName("test recipe");
+
+        when(recipeService.saveFavouriteRecipe(recipe, 1)).thenThrow(new DataIntegrityViolationException("Recipe Already Exist"));
+
+        // Act
+        mockMvc.perform(post("/api/recipe/save")
+                        .param("userId", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recipe)))
+                .andExpect(status().isConflict());
     }
     @Test
     public void searchRecipeByIngredients_ShouldReturnRecipes() throws Exception {

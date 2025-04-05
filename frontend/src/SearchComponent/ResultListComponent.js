@@ -105,6 +105,6 @@ ResultListComponent.propTypes = {
             image: PropTypes.string,
             description: PropTypes.string,
         })
-    ).isRequired,
+    ),
 };
 export default ResultListComponent;

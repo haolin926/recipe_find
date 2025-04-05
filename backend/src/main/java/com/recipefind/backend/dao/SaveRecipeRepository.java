@@ -1,5 +1,6 @@
 package com.recipefind.backend.dao;
 
+import com.recipefind.backend.entity.Recipe;
 import com.recipefind.backend.entity.SavedRecipeEntity;
 import com.recipefind.backend.entity.User;
 import jakarta.transaction.Transactional;
@@ -19,4 +20,7 @@ public interface SaveRecipeRepository extends JpaRepository<SavedRecipeEntity, I
     @Modifying
     @Query("DELETE FROM SavedRecipeEntity s WHERE s.user.id = :userId AND s.recipe.recipeId = :recipeId")
     int deleteByUserIdAndRecipeId(@Param("userId") Integer userId, @Param("recipeId") Integer recipeId);
+
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END FROM SavedRecipeEntity s WHERE s.user = :user AND s.recipe = :recipe")
+    boolean existsByUserAndRecipe(@Param("user") User user, @Param("recipe") Recipe recipe);
 }

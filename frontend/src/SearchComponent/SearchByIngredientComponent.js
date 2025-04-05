@@ -5,9 +5,9 @@ import {Input, Tag} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
 import PropTypes from "prop-types";
 
-const SearchByIngredientComponent = ({onSearchByIngredients}) => {
+const SearchByIngredientComponent = ({onSearchByIngredients, initialIngredients}) => {
 
-    const [tags, setTags] = useState([]);
+    const [tags, setTags] = useState(initialIngredients || []);
     const [inputVisible, setInputVisible] = useState(false);
     const [inputValue, setInputValue] = useState("");
     const inputRef = useRef(null);

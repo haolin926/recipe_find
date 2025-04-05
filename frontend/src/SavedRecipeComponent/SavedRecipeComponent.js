@@ -73,7 +73,7 @@ function SavedRecipeComponent () {
             navigate("/login");
             message.info("You must login first to see saved recipes");
         }
-    }, [user, fetchSavedRecipe, navigate]);
+    }, [loading, user, fetchSavedRecipe, navigate]);
 
     const truncateDescription = (description) => {
         if (description) {

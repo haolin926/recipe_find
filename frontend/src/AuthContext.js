@@ -64,7 +64,8 @@ export const AuthProvider = ({children}) => {
             const response = await axios.post("http://localhost:8080/api/user/register", {
                 username: values.username,
                 password: values.password,
-                email: values.email
+                email: values.email,
+                userPhoto: values.registerPhoto
             });
 
             if (response.status === 200) {
@@ -73,7 +74,12 @@ export const AuthProvider = ({children}) => {
                 return { success: false, message: "Register failed, Please try again" };
             }
         } catch (error) {
-            return { success: false, message: "Register failed, Please try again" };
+            if(error.response && error.response.status === 409) {
+                return { success: false, message: "Register Failed, The Username is Already Used." };
+            }
+            else {
+                return {success: false, message: "Register failed, Please try again"};
+            }
         }
     };
 

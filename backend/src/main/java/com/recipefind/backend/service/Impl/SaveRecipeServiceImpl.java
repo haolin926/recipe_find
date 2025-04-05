@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,10 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
         User user = userService.getUserById(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
+        }
+        if (isRecipeSavedByUser(user, recipe)) {
+            logger.info("Recipe already saved by user");
+            throw new DataIntegrityViolationException("Recipe already saved by user");
         }
         SavedRecipeEntity savedRecipeEntity = new SavedRecipeEntity();
         savedRecipeEntity.setRecipe(recipe);
@@ -75,5 +80,10 @@ public class SaveRecipeServiceImpl implements SaveRecipeService {
             logger.error(e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public boolean isRecipeSavedByUser(User user, Recipe recipe) {
+        return saveRecipeRepository.existsByUserAndRecipe(user, recipe);
     }
 }

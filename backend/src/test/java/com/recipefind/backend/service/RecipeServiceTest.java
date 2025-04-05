@@ -3,6 +3,7 @@ package com.recipefind.backend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.recipefind.backend.dao.CommentRepository;
 import com.recipefind.backend.dao.RecipeRepository;
 import com.recipefind.backend.entity.*;
 import com.recipefind.backend.service.Impl.RecipeServiceImpl;
@@ -64,6 +65,9 @@ public class RecipeServiceTest {
 
     @Mock
     private MultipartFile image;
+
+    @Mock
+    private CommentRepository commentRepository;
 
     private static final String FAKE_GOOGLE_VISION_URL = "https://vision.googleapis.com/v1/images:annotate?key=mockApiKey";
 
@@ -376,8 +380,9 @@ public class RecipeServiceTest {
                   "responses": [
                     {
                       "labelAnnotations": [
-                        { "description": "Tomato", "score": 0.8 },
-                        { "description": "Carrot", "score": 0.6 },
+                        { "description": "Tomato", "score": 0.9 },
+                        { "description": "Carrot", "score": 0.8 },
+                        { "description": "Apple", "score": 0.5 },
                         { "description": "Computer", "score": 0.1 }
                       ]
                     }
@@ -446,6 +451,38 @@ public class RecipeServiceTest {
     }
 
     @Test
+    void testLabelIngredients_withNoLabelsReturned() throws Exception {
+        // Mocking the image data
+        byte[] imageBytes = "fake image data".getBytes();
+        MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", imageBytes);
+
+        // Mock the response from Google Vision API (mocking the REST call)
+        String googleVisionResponse = """
+                {
+                  "responses": [
+                    {
+                      "labelAnnotations": [
+                      ]
+                    }
+                  ]
+                }""";
+
+        JsonNode responseNode = new ObjectMapper().readTree(googleVisionResponse);
+
+        ResponseEntity<String> mockGoogleVisionResponse = new ResponseEntity<>(googleVisionResponse, HttpStatus.OK);
+        when(restTemplate.postForEntity(eq(FAKE_GOOGLE_VISION_URL), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(mockGoogleVisionResponse);
+        when(objectMapper.readTree(googleVisionResponse)).thenReturn(responseNode);
+
+        // Call the method under test
+        List<String> ingredients = recipeService.labelIngredients(image);
+
+        // Assert that no ingredients are detected
+        assertNull(ingredients);
+        verify(recipeService, never()).isIngredient(anyString());
+    }
+
+    @Test
     void testLabelIngredients_withRetriesAndErrorHandling() {
         // Mocking the image data
         byte[] imageBytes = "fake image data".getBytes();
@@ -454,6 +491,20 @@ public class RecipeServiceTest {
         // Simulating API failure (for retries)
         when(restTemplate.postForEntity(eq(FAKE_GOOGLE_VISION_URL), any(HttpEntity.class), eq(String.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS));
+
+        // Retry scenario should throw an exception after MAX_RETRIES are exhausted
+        assertThrows(Exception.class, () -> recipeService.labelIngredients(image));
+    }
+
+    @Test
+    void testLabelIngredients_withOtherException() {
+        // Mocking the image data
+        byte[] imageBytes = "fake image data".getBytes();
+        MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", imageBytes);
+
+        // Simulating API failure (for retries)
+        when(restTemplate.postForEntity(eq(FAKE_GOOGLE_VISION_URL), any(HttpEntity.class), eq(String.class)))
+                .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         // Retry scenario should throw an exception after MAX_RETRIES are exhausted
         assertThrows(Exception.class, () -> recipeService.labelIngredients(image));
@@ -761,6 +812,85 @@ public class RecipeServiceTest {
         assertEquals("Tomato", result.getUsedIngredients().get(0));
         assertEquals("Onion", result.getUsedIngredients().get(1));
         assertEquals("Garlic", result.getUsedIngredients().get(2));
+    }
+
+    @Test
+    void testIsIngredient() throws Exception {
+        // Arrange
+        String ingredientName = "Tomato";
+        String apiResponse = "[{\"id\": 1, \"name\": \"Tomato\"}]";
+        JsonNode mockJsonNode = new ObjectMapper().readTree(apiResponse);
+
+        when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(new ResponseEntity<>(apiResponse, HttpStatus.OK));
+        when(objectMapper.readTree(apiResponse)).thenReturn(mockJsonNode);
+
+        //Act
+        boolean result = recipeService.isIngredient(ingredientName);
+
+        assertTrue(result);
+        verify(restTemplate, times(1)).postForEntity(anyString(), any(HttpEntity.class), eq(String.class));
+        verify(objectMapper, times(1)).readTree(apiResponse);
+    }
+
+    @Test
+    void testIsIngredient_NotFound() throws Exception {
+        // Arrange
+        String ingredientName = "NonExistentIngredient";
+        String apiResponse = "[]";
+        JsonNode mockJsonNode = new ObjectMapper().readTree(apiResponse);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
+                .thenReturn(new ResponseEntity<>(apiResponse, org.springframework.http.HttpStatus.OK));
+        when(objectMapper.readTree(apiResponse)).thenReturn(mockJsonNode);
+
+        // Act
+        boolean result = recipeService.isIngredient(ingredientName);
+
+        // Assert
+        assertFalse(result);
+        verify(restTemplate, times(1)).postForEntity(anyString(), any(), eq(String.class));
+        verify(objectMapper, times(1)).readTree(apiResponse);
+    }
+
+    @Test
+    void testUpdateRecipeRate() {
+        // Arrange
+        Long recipeId = 1L;
+        Float newRate = 4.5f;
+        Recipe mockRecipe = new Recipe();
+        mockRecipe.setRate(4.0f);
+
+        when(recipeRepository.findRecipeByRecipeId(anyLong())).thenReturn(mockRecipe);
+        when(commentRepository.countCommentsByRecipeIdAndRateNot(anyInt(), anyFloat())).thenReturn(2);
+
+        // Act
+        Boolean result = recipeService.updateRecipeRate(recipeId, newRate);
+
+        // Assert
+        assertTrue(result);
+        assertEquals(4.25f, mockRecipe.getRate());
+        verify(recipeRepository, times(1)).findRecipeByRecipeId(anyLong());
+        verify(commentRepository, times(1)).countCommentsByRecipeIdAndRateNot(anyInt(), anyFloat());
+        verify(recipeRepository, times(1)).save(mockRecipe);
+    }
+
+    @Test
+    void testUpdateRecipeRate_Exception() {
+        // Arrange
+        Long recipeId = 1L;
+        Float newRate = 4.5f;
+
+        when(recipeRepository.findRecipeByRecipeId(anyLong())).thenThrow(new RuntimeException("Error"));
+
+        // Act
+        Boolean result = recipeService.updateRecipeRate(recipeId, newRate);
+
+        // Assert
+        assertFalse(result);
+        verify(recipeRepository, times(1)).findRecipeByRecipeId(anyLong());
+        verify(commentRepository, times(0)).countCommentsByRecipeIdAndRateNot(anyInt(), anyFloat());
+        verify(recipeRepository, times(0)).save(any(Recipe.class));
     }
 }
 

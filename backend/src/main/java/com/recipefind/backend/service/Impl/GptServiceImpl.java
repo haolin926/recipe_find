@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,11 +38,21 @@ public class GptServiceImpl implements GptService {
         requestBody.put("model", "gpt-3.5-turbo");
 
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system", "content",
-                "You are a professional chef. Generate a short, engaging description (under 100 words) for each recipe provided. " +
-                        "Return the result as a **valid JSON array** in the following format: " +
-                        "[{\"recipe\": \"Recipe Name\", \"description\": \"Generated description...\"}]. " +
-                        "Ensure the response contains **only JSON** with no extra text, no explanations, and no markdown formatting."
+        messages.add(Map.of(
+                "role", "system",
+                "content", """
+        You are a professional chef and food writer. For every recipe name provided, generate a short, vivid, and engaging description under 100 words.
+
+        Return the result as a **valid JSON array**, where each object follows this format:
+        {
+          "recipe": "Recipe Name",
+          "description": "A flavorful description that highlights the essence and appeal of the dish."
+        }
+
+        ✅ Each recipe **must** include a non-empty description.
+        ❌ Do not include any explanations, extra text, or markdown.
+        ✅ Return only the raw JSON array as the output.
+        """
         ));
 
         StringBuilder userPrompt = new StringBuilder("Here are the recipes:\n");
@@ -56,7 +63,7 @@ public class GptServiceImpl implements GptService {
         messages.add(Map.of("role", "user", "content", userPrompt.toString()));
 
         requestBody.put("messages", messages);
-        requestBody.put("max_tokens", Math.min(500, 150 * recipes.size())); // Adjust token limit for batch
+        requestBody.put("max_tokens", Math.min(500, 1500 * recipes.size())); // Adjust token limit for batch
 
         // Create the request entity
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
@@ -99,7 +106,7 @@ public class GptServiceImpl implements GptService {
             }
             return recipes;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Error parsing OpenAI response: {}", e.getMessage());
             return recipes;
         }
     }
@@ -116,9 +123,18 @@ public class GptServiceImpl implements GptService {
         requestBody.put("model", "gpt-3.5-turbo");
 
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system", "content",
-                "You are a food expert. Classify each word as 'ingredient', 'dish', or 'unknown'. " +
-                        "Return a JSON object where each word maps to its category."));
+        messages.add(Map.of(
+                "role", "system",
+                "content", """
+        You are a food expert. For each word in the given list, classify it strictly as:
+        - "ingredient"
+        - "unknown"
+        
+        Return the result as a **valid JSON object** with each word as a key and its classification as the value.
+
+        ❗ Only return the JSON object — no explanations, no extra text.
+        """
+        ));
 
         // Construct the user query
         messages.add(Map.of("role", "user", "content", "Classify the following words: " + String.join(", ", words)));
@@ -137,19 +153,21 @@ public class GptServiceImpl implements GptService {
 
             if (choicesNode.isArray() && !choicesNode.isEmpty()) {
                 String responseText = choicesNode.get(0).path("message").path("content").asText().trim();
-
+                responseText = responseText.replaceAll("```json", "").replaceAll("```", "").trim();
+                System.out.println(responseText);
                 // Parse the JSON response (Example: {"tomato": "ingredient", "pizza": "dish", "laptop": "unknown"})
                 JsonNode classificationNode = objectMapper.readTree(responseText);
 
                 for (String word : words) {
                     String category = classificationNode.path(word).asText();
-                    if ("ingredient".equalsIgnoreCase(category) || "dish".equalsIgnoreCase(category)) {
+                    if ("ingredient".equalsIgnoreCase(category)) {
                         validatedItems.add(word);
                     }
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Error parsing OpenAI response: {}", e.getMessage());
+            logger.error("Cause: ", e);
         }
 
         return validatedItems;

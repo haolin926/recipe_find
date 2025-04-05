@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.Query;
 public interface MealPlanRecipeRepository extends JpaRepository<MealPlanRecipeEntity, Integer> {
 
     @Query("SELECT mpr FROM MealPlanRecipeEntity mpr WHERE mpr.mealPlan.mealPlanId = :mealPlanId AND mpr.recipe.recipeId = :recipeId")
-    MealPlanRecipeEntity findByMealPlan_MealPlanIdAndRecipe_RecipeId(Integer mealPlanId, Long recipeId);
+    MealPlanRecipeEntity findMealPlanRecipe_ByMealPlanIdAndRecipeId(Integer mealPlanId, Long recipeId);
 }

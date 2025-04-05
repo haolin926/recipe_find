@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -107,6 +108,24 @@ public class MealPlanControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(recipeDTO)))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void updateMealPlanForUserOnDate_RecipeAlreadyExist_ShouldReturn409() throws Exception {
+        // Arrange
+        RecipeDTO recipeDTO = new RecipeDTO();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = sdf.parse("2025-02-10");
+
+        when(mealPlanService.AddRecipeIntoMealPlan(1, date, recipeDTO)).thenThrow(new DataIntegrityViolationException("Simulated server error"));
+
+        // Act
+        mockMvc.perform(put("/api/mealplan/update")
+                        .param("userId", "1")
+                        .param("date", "2025-02-10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(recipeDTO)))
+                .andExpect(status().isConflict());
     }
 
     @Test

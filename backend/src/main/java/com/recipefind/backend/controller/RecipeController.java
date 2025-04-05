@@ -8,6 +8,7 @@ import com.recipefind.backend.service.RecipeService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,14 +30,10 @@ public class RecipeController {
 
         try {
             List<RecipeDTO> recipes = recipeService.findRecipesByName(queryName);
-
-            if (!(recipes.isEmpty())) {
-                return ResponseEntity.ok(recipes);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
+            return ResponseEntity.ok(recipes);
 
         } catch (Exception e) {
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -46,22 +43,17 @@ public class RecipeController {
         try {
             PredictResult prediction = recipeService.imagePrediction(image);
 
-            if (prediction != null) {
-                return ResponseEntity.ok(prediction);
-            } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            }
+            return ResponseEntity.ok(prediction);
         } catch (Exception e) {
+            logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 
     @GetMapping("/id")
     public ResponseEntity<RecipeDTO> getRecipeById(@RequestParam("queryId") Integer id) {
 
         try {
-            System.out.println("Query ID: " + id.toString());
             RecipeDTO recipes = recipeService.findRecipeInSpoonacularByApiId(id);
 
             if (!(recipes == null)) {
@@ -85,7 +77,11 @@ public class RecipeController {
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-        } catch (Exception e) {
+        } catch (DataIntegrityViolationException e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Recipe already saved by user");
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

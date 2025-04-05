@@ -5,29 +5,35 @@ import {Button, Form, Input, message} from "antd";
 import {Link, Paper} from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import {LockOutlined, UserOutlined} from "@ant-design/icons";
+import PropTypes from "prop-types";
 
-function LoginWindowComponent () {
+function LoginWindowComponent ( { redirectOnLogin = true,  onLoginSuccess } ) {
     const { user, login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (user) {
+        if (user && redirectOnLogin) {
             navigate("/");
         }
-    }, [user, navigate]);
+    }, [redirectOnLogin, user, navigate]);
 
     const onFinish = async (values) => {
         const result = await login(values);
 
         if (result.success) {
             message.success("Login successful");
-            navigate("/");
+            if (onLoginSuccess) {
+                onLoginSuccess();
+            }
+            if (redirectOnLogin) {
+                navigate("/");
+            }
         } else {
             message.error(result.message);
         }
     };
 
-    const onFinishFailed = (errorInfo) => {
+    const onFinishFailed = () => {
         message.error("Login failed, Please try again");
     };
 
@@ -88,10 +94,13 @@ function LoginWindowComponent () {
                         Submit
                     </Button>
                 </Form.Item>
-                <Link href="signup">Haven't got an account yet? Click here to create one</Link>
+                <Link href="/signup">Haven't got an account yet? Click here to create one</Link>
             </Form>
         </Paper>
     );
 }
-
+LoginWindowComponent.propTypes = {
+    redirectOnLogin: PropTypes.bool,
+    onLoginSuccess: PropTypes.func,
+};
 export default LoginWindowComponent;

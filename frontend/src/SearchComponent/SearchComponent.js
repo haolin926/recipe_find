@@ -22,6 +22,7 @@ function SearchComponent () {
     const [predictionResult, setPredictionResult] = React.useState(null);
     const [uploadedImage, setUploadedImage] = React.useState(null);
     const [searchResult, setSearchResult] = React.useState(null);
+    const [ingredients, setIngredients] = React.useState([]);
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -39,10 +40,16 @@ function SearchComponent () {
             setSearchResult(response.data);
             setContentToDisplay("searchResult");
         } catch (error) {
-            setSearchResult(null);
-            message.error("Failed to search recipes.")
-            console.error("Error fetching recipe by name:", error);
-            setContentToDisplay(null);
+            if (error && error.response && error.response.status === 404) {
+                setSearchResult(null);
+                setContentToDisplay("searchResult");
+            }
+            else {
+                setSearchResult(null);
+                message.error("Failed to search recipes.")
+                console.error("Error fetching recipe by name:", error);
+                setContentToDisplay(null);
+            }
         }
     }
 
@@ -80,6 +87,8 @@ function SearchComponent () {
             message.error("Please provide a list of ingredients.");
             return;
         }
+        setValue("3");
+        setIngredients(ingredients);
         const ingredientsParam = ingredients.join(",");
         setContentToDisplay("loading");
         try {
@@ -115,7 +124,7 @@ function SearchComponent () {
                         <SearchByImageComponent onImageUpload={handleImageUpload}/>
                     </TabPanel>
                     <TabPanel value="3">
-                        <SearchByIngredientComponent onSearchByIngredients={handleSearchByIngredients}/>
+                        <SearchByIngredientComponent onSearchByIngredients={handleSearchByIngredients} initialIngredients={ingredients}/>
                     </TabPanel>
                 </TabContext>
             </Paper>

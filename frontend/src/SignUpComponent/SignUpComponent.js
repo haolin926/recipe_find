@@ -1,17 +1,46 @@
 import Box from "@mui/material/Box";
 import {Link, Paper} from "@mui/material";
 import AppBar from "@mui/material/AppBar";
-import {Button, Form, Input, message} from "antd";
-import React, {useContext} from "react";
+import {Avatar, Button, Form, Input, message, Upload} from "antd";
+import React, {useContext, useState} from "react";
 import {AuthContext} from "../AuthContext";
 import "./SignUpComponent.css";
+import {UploadOutlined, UserOutlined} from "@ant-design/icons";
 
 function SignUpComponent () {
 
     const {register} = useContext(AuthContext);
 
+    const [userPhoto, setUserPhoto] = useState(null);
+
+    const handleAvatarChange = (info) => {
+        const file = info.file;
+
+        if (!file) return;
+
+        // Read file as Base64
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+            setUserPhoto(reader.result);
+        };
+
+        reader.onerror = (error) => {
+            message.error("Failed to read image file");
+            console.error("File reading error:", error);
+        };
+    };
+
     const onFinish = async (values) => {
-        const result = await register(values);
+        let registerPhoto;
+
+        if (!userPhoto) {
+            registerPhoto = "";
+        } else {
+            registerPhoto = userPhoto;
+        }
+        const result = await register({...values, registerPhoto});
 
         if (result.success) {
             message.success(result.message);
@@ -39,6 +68,24 @@ function SignUpComponent () {
                 <AppBar className={"commonHeader"} position={"static"}>
                     <h2>Sign Up</h2>
                 </AppBar>
+                <Box className={"photoContainer"}>
+                    <Upload
+                        showUploadList={false}
+                        beforeUpload={() => false} // Prevent automatic upload
+                        onChange={handleAvatarChange} // Ensure onChange fires
+                        accept="image/*" // Only allow images
+                    >
+                        <Avatar
+                            className={"centeredAvatar"}
+                            size={100}
+                            src={userPhoto}
+                            icon={!userPhoto && <UserOutlined />}
+                            style={{ cursor: "pointer", marginBottom: 10 }}
+                        />
+                        <br />
+                        <Button icon={<UploadOutlined />}>Upload Profile Photo</Button>
+                    </Upload>
+                </Box>
                 <Form
                     name="basic"
                     labelCol={{

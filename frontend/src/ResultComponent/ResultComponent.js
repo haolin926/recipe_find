@@ -42,9 +42,6 @@ const ResultComponent = () => {
 
     const [comments, setComments] = useState([]);
 
-    // eslint-disable-next-line no-unused-vars
-    const [commentsLoading, setCommentsLoading] = useState(false);
-
     const [newComment, setNewComment] = useState("");
 
     // Handle image upload
@@ -134,7 +131,6 @@ const ResultComponent = () => {
     }
 
     const fetchRecipeComments = useCallback(async () => {
-        setCommentsLoading(true);
         if (!recipeId) {
             message.error("Failed to get recipe id");
             navigate("/");
@@ -151,8 +147,6 @@ const ResultComponent = () => {
         } catch (error) {
             console.log(error);
             message.error("Failed to get comments");
-        } finally {
-            setCommentsLoading(false);
         }
     }, [recipeId, navigate]);
 
@@ -244,8 +238,12 @@ const ResultComponent = () => {
                         message.error("Failed to add recipe into meal plan, please try again.");
                     }
                 } catch (error) {
-                    console.error("error adding recipe into meal plan: ", error);
-                    message.error("An unexpected error happened, please try again", error);
+                    if (error && error.response && error.response.status === 409) {
+                        message.error("Recipe already in meal plan");
+                    } else {
+                        console.error("error adding recipe into meal plan: ", error);
+                        message.error("An unexpected error happened, please try again");
+                    }
                 }
             }
             handleMealPlanModalCancel(); // Close the modal after submission
@@ -284,8 +282,13 @@ const ResultComponent = () => {
                     console.error("Failed to add recipe to favorites");
                 }
             } catch (error) {
-                message.error("Failed to save recipe into favourite");
-                console.log("error occurred when adding to favourite");
+                if (error && error.response && error.response.status === 409) {
+                    message.error("Recipe already in favourites");
+                }
+                else {
+                    message.error("Failed to save recipe into favourite");
+                    console.log("error occurred when adding to favourite");
+                }
             }
         } else {
             message.info("Login Required")
@@ -461,7 +464,7 @@ const ResultComponent = () => {
                 centered
             >
                 <DialogContent sx={{ width: '500px', padding:0 }}>
-                    <LoginWindowComponent />
+                    <LoginWindowComponent redirectOnLogin={false} onLoginSuccess={handleLoginModalCancel}/>
                 </DialogContent>
             </Dialog>
 

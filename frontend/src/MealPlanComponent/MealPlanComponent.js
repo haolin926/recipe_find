@@ -75,7 +75,7 @@ export default function MealPlanComponent() {
             message.info("You must login first to visit meal plan");
             navigate("/login");
         }
-    }, [user, selectedDate, fetchMealPlanForCurrentDate, navigate]);
+    }, [user, selectedDate, fetchMealPlanForCurrentDate, navigate, loading]);
 
     const getWeeklySummary = async () => {
         try {

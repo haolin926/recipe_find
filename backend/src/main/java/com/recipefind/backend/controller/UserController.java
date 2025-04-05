@@ -108,7 +108,6 @@ public class UserController {
 
     @PutMapping("/changepassword")
     public ResponseEntity<?> changeUserPassword(@RequestBody Map<String, String> passwordUpdate, HttpServletRequest request) {
-        System.out.println("Received password update request: " + passwordUpdate);
         User user = validateTokenAndGetUser(request);
 
         String originalPassword = passwordUpdate.get("oldPassword");

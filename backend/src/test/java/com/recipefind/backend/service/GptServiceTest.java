@@ -123,7 +123,7 @@ public class GptServiceTest {
                 .thenReturn(responseEntity);
 
         // Mocking ObjectMapper behavior
-        String jsonResponse = "{\"tomato\": \"ingredient\", \"pizza\": \"dish\", \"laptop\": \"unknown\"}";
+        String jsonResponse = "{\"tomato\": \"ingredient\", \"pizza\": \"ingredient\", \"laptop\": \"unknown\"}";
         JsonNode mockJsonNode = new ObjectMapper().readTree(jsonResponse);
 
         ObjectMapper realObjectMapper = new ObjectMapper();

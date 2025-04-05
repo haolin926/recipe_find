@@ -17,6 +17,13 @@ const SearchByNameComponent = ({onSearchByName}) => {
     const handleSubmit = async () => {
         onSearchByName(recipeName);
     };
+
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            handleSubmit();
+        }
+    };
+
     return (
             <Box className={"searchBarContainer"}>
                 <TextField
@@ -24,9 +31,9 @@ const SearchByNameComponent = ({onSearchByName}) => {
                     label="Enter Recipe Name"
                     variant="filled"
                     className="customTextField"
-
                     value={recipeName}
                     onChange={handleInputChange}
+                    onKeyDown={handleKeyPress}
                 />
                 <Button className="customButton" type="text" size="large" onClick={handleSubmit}>Search</Button>
             </Box>

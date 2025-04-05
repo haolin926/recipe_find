@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -84,6 +85,11 @@ public class MealPlanServiceImpl implements MealPlanService {
             mealPlanEntity = mealPlanRepository.save(mealPlanEntity);
         }
 
+        // check if recipe already in mealplan
+        MealPlanRecipeEntity existingMealPlanRecipe = mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(mealPlanEntity.getMealPlanId(), savedRecipe.getRecipeId());
+        if (existingMealPlanRecipe != null) {
+            throw new DataIntegrityViolationException("Recipe already exists in the Meal Plan");
+        }
         MealPlanRecipeEntity mealPlanRecipeEntity = new MealPlanRecipeEntity();
         mealPlanRecipeEntity.setMealPlan(mealPlanEntity);
         mealPlanRecipeEntity.setRecipe(savedRecipe);
@@ -103,7 +109,7 @@ public class MealPlanServiceImpl implements MealPlanService {
             throw new RuntimeException("Meal Plan nt found");
         }
 
-        MealPlanRecipeEntity mealPlanRecipeEntity = mealPlanRecipeRepository.findByMealPlan_MealPlanIdAndRecipe_RecipeId(mealPlanId, recipeId.longValue());
+        MealPlanRecipeEntity mealPlanRecipeEntity = mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(mealPlanId, recipeId.longValue());
 
         if (mealPlanRecipeEntity == null) {
             throw new RuntimeException("Recipe not found in the Meal Plan");

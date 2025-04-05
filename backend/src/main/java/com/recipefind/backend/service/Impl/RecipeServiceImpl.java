@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -57,7 +58,10 @@ public class RecipeServiceImpl implements RecipeService {
             "Cuisine",
             "Grilling",
             "Barbecue",
-            "Leaf vegetable"
+            "Leaf vegetable",
+            "Kids' meal",
+            "Side dish",
+            "Fried Food"
     );
     private final CommentRepository commentRepository;
     @Setter
@@ -69,18 +73,27 @@ public class RecipeServiceImpl implements RecipeService {
     private String googleVisionApiKey;
 
     private static final int MAX_RETRIES = 5;
-    private static final long RETRY_DELAY = 500; // 500 ms delay
+    private static final long RETRY_DELAY = 3000; // 500 ms delay
     private static final String GOOGLE_VISION_URL = "https://vision.googleapis.com/v1/images:annotate?key=";
     private static final String SPOONACULAR_PARSE_INGREDIENT_URL = "https://api.spoonacular.com/recipes/parseIngredients?apiKey=";
     private static final String SPOONACULAR_FIND_RECIPE_BY_INGREDIENT_URL = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=";
     private final Logger logger = LoggerFactory.getLogger(RecipeServiceImpl.class);
+
     @Override
     public List<RecipeDTO> findRecipesByName(String queryName) throws JsonProcessingException {
-        String url = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey + "&query=" + queryName + "&instructionsRequired=true&addRecipeInstructions=true&addRecipeNutrition=true&number=10";
+
+        String url = "https://api.spoonacular.com/recipes/complexSearch?apiKey="
+                + apiKey
+                + "&query=" + queryName
+                + "&instructionsRequired=true&addRecipeInstructions=true&addRecipeNutrition=true&number=10";
+
         String response = restTemplate.getForEntity(url, String.class).getBody();
         JsonNode responseJson = objectMapper.readTree(response);
         List<RecipeDTO> recipeList = new ArrayList<>();
         JsonNode recipes = responseJson.path("results");
+        if (recipes.isEmpty()) {
+            return recipeList;
+        }
         for (JsonNode recipe : recipes) {
             RecipeDTO formattedRecipe = constructRecipeFromComplexSearch(recipe);
             recipeList.add(formattedRecipe);
@@ -290,7 +303,7 @@ public class RecipeServiceImpl implements RecipeService {
                     String capitalizedName = CapitalizeStringUtil.capitalizeString(name);
                     float probability = predictedResult.path("probability").floatValue();
 
-                    if(probability > 0.01) {
+                    if(probability > 0.05) {
                         result.setName(capitalizedName);
                         result.setProbability(probability);
                         predictedNames.add(result);
@@ -304,6 +317,7 @@ public class RecipeServiceImpl implements RecipeService {
                 return null;
             }
         } catch (Exception e) {
+            logger.error(e.getMessage());
             throw new Exception(e);
         }
     }
@@ -315,7 +329,9 @@ public class RecipeServiceImpl implements RecipeService {
             // convert image to base64 for access the API
             String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
             // construct request body
-            String requestJson = "{ \"requests\": [ { \"image\": { \"content\": \"" + base64Image + "\" }, \"features\": [ { \"type\": \"LABEL_DETECTION\", \"maxResults\": 20 } ] } ] }";
+            String requestJson = "{ \"requests\": [ { \"image\": { \"content\": \""
+                                + base64Image
+                                + "\" }, \"features\": [ { \"type\": \"LABEL_DETECTION\", \"maxResults\": 20 } ] } ] }";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -356,20 +372,22 @@ public class RecipeServiceImpl implements RecipeService {
                         System.out.println("Error: Received status " + response.getStatusCode());
                         retries++;
                     }
-                } catch (HttpClientErrorException.TooManyRequests e) {
-                    retries++;
-                    if (retries >= MAX_RETRIES) {
-                        throw new Exception("Max retries reached", e);
+                } catch (HttpClientErrorException e) {
+                    if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                        retries++;
+                        System.out.println("Too many requests, retrying in 3 seconds...");
+                        TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
+                        if (retries >= MAX_RETRIES) {
+                            System.out.println("Max retries reached. Exiting.");
+                            throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS);
+                        }
+                    } else {
+                        System.out.println("Error: " + e.getMessage());
+                        throw new Exception("Error during API request: " + e.getMessage());
                     }
-                    System.out.println("Too many requests, retrying in 10 seconds...");
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY);
-                } catch (Exception e) {
-                    retries++; // Increment retries on unexpected errors
-                    if (retries >= MAX_RETRIES) {
-                        throw new Exception("Max retries reached due to unexpected error", e);
-                    }
-                    System.out.println("Unexpected error: " + e.getMessage() + ". Retrying in 5 seconds...");
-                    TimeUnit.MILLISECONDS.sleep(5000); // Retry after 5 seconds
+                }
+                catch (Exception e) {
+                    throw new Exception("Error during API request: " + e.getMessage());
                 }
             }
         } catch(Exception e){
@@ -407,11 +425,9 @@ public class RecipeServiceImpl implements RecipeService {
             List<Prediction> predictName = predictName(image);
 
             List<String> ingredients = labelIngredients(image);
-            System.out.println("Detected ingredients: " + ingredients);
 
             List<String> filteredIngredients = gptService.validateFoodItems(ingredients);
             filteredIngredients.removeIf(unWantIngredientList::contains);
-            System.out.println("Filtered ingredients: " + filteredIngredients);
 
             PredictResult predictResult = new PredictResult();
             predictResult.setPredictName(predictName);
@@ -429,17 +445,24 @@ public class RecipeServiceImpl implements RecipeService {
 
         //check if this recipe already in the db
         Recipe existedRecipe = findRecipeByApiId(recipeDTO.getRecipeApiId());
-        if(existedRecipe != null) {
-            System.out.println("Find matching recipe, saving into db");
-            return saveRecipeService.saveRecipeForUser(userId, existedRecipe);
+        if (existedRecipe != null) {
+            try {
+                return saveRecipeService.saveRecipeForUser(userId, existedRecipe);
+            } catch (DataIntegrityViolationException e) {
+                logger.error(e.getMessage());
+                throw new DataIntegrityViolationException(e.getMessage());
+            }
         }
         else {
             Recipe savedRecipe = saveRecipe(recipeDTO);
 
             if (savedRecipe != null) {
-                System.out.println("Saved recipe into db");
-                return saveRecipeService.saveRecipeForUser(userId, savedRecipe);
-
+                try {
+                    return saveRecipeService.saveRecipeForUser(userId, savedRecipe);
+                } catch (DataIntegrityViolationException e) {
+                    logger.error(e.getMessage());
+                    throw new DataIntegrityViolationException(e.getMessage());
+                }
             } else {
                 return null;
             }
@@ -494,7 +517,6 @@ public class RecipeServiceImpl implements RecipeService {
             }
 
             recipe.setRecipeNutritionEntities(recipeNutritionEntities);
-            System.out.println("construct recipe success");
 
             return recipeRepository.save(recipe);
 
@@ -514,6 +536,9 @@ public class RecipeServiceImpl implements RecipeService {
         if (response.getStatusCode().is2xxSuccessful()) {
             JsonNode rootNode = objectMapper.readTree(response.getBody());
             List<RecipeDTO> recipeDTOList = new ArrayList<>();
+            if (rootNode.isEmpty()) {
+                return recipeDTOList;
+            }
             for (JsonNode recipe : rootNode) {
 
                 RecipeDTO recipeDTO = constructRecipeSearchByIngredient(recipe);

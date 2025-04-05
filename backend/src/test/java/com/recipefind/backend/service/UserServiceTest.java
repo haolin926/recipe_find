@@ -50,6 +50,7 @@ public class UserServiceTest {
         user.setPassword("encodedPassword");
         user.setEmail("testuser@example.com");
 
+        when(userRepository.findByUsername(userDTO.getUsername())).thenReturn(null);
         when(passwordEncoder.encode(userDTO.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
@@ -70,6 +71,7 @@ public class UserServiceTest {
         userDTO.setPassword("password");
         userDTO.setEmail("testuser@example.com");
 
+        when(userRepository.findByUsername(userDTO.getUsername())).thenReturn(null);
         when(passwordEncoder.encode(userDTO.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenThrow(new DataAccessException("...") {});
 
@@ -90,6 +92,7 @@ public class UserServiceTest {
         userDTO.setPassword("password");
         userDTO.setEmail("testuser@example.com");
 
+        when(userRepository.findByUsername(userDTO.getUsername())).thenReturn(null);
         when(passwordEncoder.encode(userDTO.getPassword())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Unexpected error"));
 
@@ -100,6 +103,21 @@ public class UserServiceTest {
         assertFalse(result);
         verify(passwordEncoder, times(1)).encode(userDTO.getPassword());
         verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void testCreateUser_UsernameAlreadyExist() {
+        // Arrange
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("testuser");
+        userDTO.setPassword("password");
+        userDTO.setEmail("testuser@example.com");
+
+        User existingUser = new User();
+
+        when(userRepository.findByUsername(userDTO.getUsername())).thenReturn(existingUser);
+
+        assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(userDTO));
     }
 
     @Test
@@ -207,7 +225,6 @@ public class UserServiceTest {
         user.setEmail("oldEmail@example.com");
 
         UserDTO userDTO = new UserDTO();
-        userDTO.setUsername("newUsername");
         userDTO.setEmail("newEmail@example.com");
 
         when(userRepository.save(user)).thenReturn(user);
@@ -217,7 +234,6 @@ public class UserServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals("newUsername", result.getUsername());
         assertEquals("newEmail@example.com", result.getEmail());
         verify(userRepository, times(1)).save(user);
     }

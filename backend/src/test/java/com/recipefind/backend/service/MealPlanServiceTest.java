@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.*;
 
@@ -181,8 +182,10 @@ public class MealPlanServiceTest {
 
         when(userService.getUserById(userId)).thenReturn(user);
         when(recipeService.findRecipeByApiId(recipeDTO.getRecipeApiId())).thenReturn(null);
+        when(recipeService.saveRecipe(recipeDTO)).thenReturn(recipe);
         when(mealPlanRepository.getMealPlanEntityByUserAndPlannedDate(user, date)).thenReturn(mealPlanEntity);
         when(mealPlanRecipeRepository.save(any(MealPlanRecipeEntity.class))).thenReturn(mealPlanRecipeEntity);
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(1, 1L)).thenReturn(null);
         // Act
         MealPlanEntity result = mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO);
 
@@ -223,7 +226,7 @@ public class MealPlanServiceTest {
         when(mealPlanRepository.getMealPlanEntityByUserAndPlannedDate(user, date)).thenReturn(null);
         when(mealPlanRepository.save(any(MealPlanEntity.class))).thenReturn(mealPlanEntity);
         when(mealPlanRecipeRepository.save(any(MealPlanRecipeEntity.class))).thenReturn(mealPlanRecipeEntity);
-
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(1, 1L)).thenReturn(null);
         // Act
         MealPlanEntity result = mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO);
 
@@ -286,6 +289,7 @@ public class MealPlanServiceTest {
         when(userService.getUserById(userId)).thenReturn(user);
         when(recipeService.findRecipeByApiId(recipeDTO.getRecipeApiId())).thenReturn(recipe);
         when(mealPlanRepository.getMealPlanEntityByUserAndPlannedDate(user, date)).thenReturn(mealPlanEntity);
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(1, 1L)).thenReturn(null);
         when(mealPlanRecipeRepository.save(any(MealPlanRecipeEntity.class))).thenThrow(new RuntimeException("Failed to save MealPlanRecipeEntity"));
 
         // Act & Assert
@@ -296,6 +300,8 @@ public class MealPlanServiceTest {
         verify(mealPlanRepository, times(1)).getMealPlanEntityByUserAndPlannedDate(user, date);
         verify(mealPlanRecipeRepository, times(1)).save(any(MealPlanRecipeEntity.class));
     }
+
+
 
     @Test
     void testDeleteRecipeForMealPlan_Success() {
@@ -315,7 +321,7 @@ public class MealPlanServiceTest {
         mealPlanRecipeEntity.setRecipe(recipe);
 
         when(mealPlanRepository.findById(mealPlanId)).thenReturn(Optional.of(mealPlanEntity));
-        when(mealPlanRecipeRepository.findByMealPlan_MealPlanIdAndRecipe_RecipeId(mealPlanId, recipeId.longValue()))
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(mealPlanId, recipeId.longValue()))
                 .thenReturn(mealPlanRecipeEntity);
         when(mealPlanRepository.findById(mealPlanId)).thenReturn(Optional.of(mealPlanEntity));
 
@@ -326,6 +332,45 @@ public class MealPlanServiceTest {
         verify(mealPlanRecipeRepository, times(1)).delete(mealPlanRecipeEntity);
         assertNotNull(result);
         assertEquals(mealPlanId, result.getId());
+    }
+
+
+    @Test
+    void testAddRecipeIntoMealPlan_RecipeAlreadyInMealPlan() {
+        // Given
+        Integer userId = 1;
+        Date date = new Date();
+        RecipeDTO recipeDTO = new RecipeDTO();
+        recipeDTO.setRecipeApiId(1);
+
+        User user = new User();
+        user.setId(userId.longValue());
+
+        Recipe savedRecipe = new Recipe();
+        savedRecipe.setRecipeId(1L);
+
+        MealPlanEntity mealPlanEntity = new MealPlanEntity();
+        mealPlanEntity.setMealPlanId(1);
+        mealPlanEntity.setUser(user);
+        mealPlanEntity.setPlannedDate(date);
+
+        MealPlanRecipeEntity existingMealPlanRecipe = new MealPlanRecipeEntity();
+        existingMealPlanRecipe.setMealPlan(mealPlanEntity);
+        existingMealPlanRecipe.setRecipe(savedRecipe);
+
+        when(userService.getUserById(userId)).thenReturn(user);
+        when(recipeService.findRecipeByApiId(recipeDTO.getRecipeApiId())).thenReturn(savedRecipe);
+        when(mealPlanRepository.getMealPlanEntityByUserAndPlannedDate(user, date)).thenReturn(mealPlanEntity);
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(mealPlanEntity.getMealPlanId(), savedRecipe.getRecipeId()))
+                .thenReturn(existingMealPlanRecipe);
+
+        // When & Then
+        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () ->
+                mealPlanService.AddRecipeIntoMealPlan(userId, date, recipeDTO)
+        );
+
+        assertEquals("Recipe already exists in the Meal Plan", exception.getMessage());
+        verify(mealPlanRecipeRepository, never()).save(any(MealPlanRecipeEntity.class));
     }
 
     @Test
@@ -355,7 +400,7 @@ public class MealPlanServiceTest {
         mealPlanEntity.setMealPlanId(mealPlanId);
 
         when(mealPlanRepository.findById(mealPlanId)).thenReturn(Optional.of(mealPlanEntity));
-        when(mealPlanRecipeRepository.findByMealPlan_MealPlanIdAndRecipe_RecipeId(mealPlanId, recipeId.longValue()))
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(mealPlanId, recipeId.longValue()))
                 .thenReturn(null);
 
         // When & Then: Expect exception when recipe is not in the meal plan
@@ -382,7 +427,7 @@ public class MealPlanServiceTest {
 
         // Mocking behavior
         when(mealPlanRepository.findById(mealPlanId)).thenReturn(Optional.of(mealPlanEntity));
-        when(mealPlanRecipeRepository.findByMealPlan_MealPlanIdAndRecipe_RecipeId(mealPlanId, recipeId.longValue()))
+        when(mealPlanRecipeRepository.findMealPlanRecipe_ByMealPlanIdAndRecipeId(mealPlanId, recipeId.longValue()))
                 .thenReturn(mealPlanRecipeEntity);
         doThrow(new RuntimeException("Failed to delete Recipe from Meal Plan")).when(mealPlanRecipeRepository).delete(mealPlanRecipeEntity); // Simulate failed save
 
