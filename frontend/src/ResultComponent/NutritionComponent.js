@@ -10,14 +10,40 @@ import PropTypes from "prop-types";
 const NutritionComponent = ({nutrition}) => {
     // if nutrition is undefined or null, set it to an empty array
     const nutritionList = nutrition ?? [];
-    let pieData;
+
+    const CALORIES_PER_GRAM = {
+        Carbohydrates: 4,
+        Protein: 4,
+        Fat: 9
+    };
+    let pieData = [];
+
+    const totalCalories = nutritionList
+        .filter(nutrition => nutrition.name !== "Calories") // Exclude the 'Calories' entry
+        .reduce((total, nutrition) => {
+            const grams = parseFloat(nutrition.amount);
+            const calories = grams * (CALORIES_PER_GRAM[nutrition.name] || 0);
+            return total + calories;
+        }, 0);
 
     if (nutritionList.length > 0) {
-        pieData = nutritionList.map(nutrition => ({
-            label: nutrition.name,
-            value: parseFloat(nutrition.amount) // Ensure value is a number
-        }));
+        pieData = nutritionList
+            .filter(nutrition => nutrition.name !== "Calories") // Exclude the 'Calories' entry
+            .map(nutrition => {
+                // Ensure the amount is a number and convert it to calories
+                const grams = parseFloat(nutrition.amount);
+                const calories = grams * (CALORIES_PER_GRAM[nutrition.name] || 0); // Default to 0 for non-macronutrient items
+                const percentage = (calories / totalCalories) * 100;
+
+                return {
+                    label: nutrition.name,
+                    value: percentage.toFixed(1) // Caloric value for the nutrient
+                };
+            });
     }
+
+    const valueFormatter = (item) => `${item.value}%`;
+
     return (
             <Box className="bottomContainerPaper">
                 <Box>
@@ -27,7 +53,7 @@ const NutritionComponent = ({nutrition}) => {
                 </Box>
                 <Box className={"resultInfoContainer nutritionPaperContainer"} >
                     <Paper elevation={3} className={"nutritionPaper"}>
-                        {nutritionList.length > 0 ? (
+                        {nutritionList.length > 0 && pieData.length > 0 ? (
                             <div>
                                 <div>
                                     <div className="carouselItem">
@@ -40,6 +66,7 @@ const NutritionComponent = ({nutrition}) => {
                                                 paddingAngle: 5,
                                                 highlightScope: { fade: 'global', highlight: 'item' },
                                                 faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                                                valueFormatter
                                             },
                                         ]}
                                         width={500}

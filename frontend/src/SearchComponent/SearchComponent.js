@@ -40,7 +40,7 @@ function SearchComponent () {
             setSearchResult(response.data);
             setContentToDisplay("searchResult");
         } catch (error) {
-            if (error && error.response && error.response.status === 404) {
+            if (error?.response?.status === 404) {
                 setSearchResult(null);
                 setContentToDisplay("searchResult");
             }
@@ -74,7 +74,7 @@ function SearchComponent () {
                 setContentToDisplay("predictResult");
 
             } catch (error) {
-                console.error("error uploading Image");
+                console.error("error uploading Image", error);
                 message.error("Prediction failed");
                 setPredictionResult(null);
                 setContentToDisplay(null);

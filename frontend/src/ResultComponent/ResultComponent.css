@@ -160,4 +160,8 @@
     .limitedHeight {
         min-height: 450px;
     }
+    .resultTags {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
 }

@@ -95,7 +95,7 @@ export default function MealPlanComponent() {
                 console.error('Failed to fetch meal plan:', response.statusText);
             }
         } catch (error) {
-            console.error("Failed to fetch weekly summary");
+            console.error("Failed to fetch weekly summary", error);
         }
     }
     const handleCloseDialog = () => {

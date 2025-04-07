@@ -85,6 +85,7 @@ function ProfileComponent () {
             }
         } catch (error) {
             message.error("Failed to update profile. Please try again.");
+            console.error("Profile update error:", error);
         }
     };
 

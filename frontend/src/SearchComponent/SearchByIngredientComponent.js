@@ -81,7 +81,8 @@ const SearchByIngredientComponent = ({onSearchByIngredients, initialIngredients}
 };
 
 SearchByIngredientComponent.propTypes = {
-    onSearchByIngredients: PropTypes.func.isRequired
+    onSearchByIngredients: PropTypes.func.isRequired,
+    initialIngredients: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default SearchByIngredientComponent;

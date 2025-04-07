@@ -6,6 +6,8 @@ import numpy as np
 import io
 
 app = Flask(__name__)
+# CSRF protection is not needed for backend-to-backend API calls (no browser or session involved)
+# This API is only accessed by a trusted backend servicepm
 
 CLASS_PATH = "classes.txt"
 

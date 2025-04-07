@@ -63,7 +63,7 @@ public class GptServiceImpl implements GptService {
         messages.add(Map.of("role", "user", "content", userPrompt.toString()));
 
         requestBody.put("messages", messages);
-        requestBody.put("max_tokens", Math.min(500, 1500 * recipes.size())); // Adjust token limit for batch
+        requestBody.put("max_tokens", 2048);
 
         // Create the request entity
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);

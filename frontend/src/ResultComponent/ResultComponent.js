@@ -212,48 +212,53 @@ const ResultComponent = () => {
     };
 
     const handleMealPlanFormSubmit = async () => {
-        if (user != null) {
-            if (selectedDate == null) {
-                message.error("Please select a valid date!");
-            }
-            else {
-                const formattedDate = selectedDate.format("YYYY-MM-DD");
-                try {
-                    const response = await axios.put(
-                        "http://localhost:8080/api/mealplan/update",
-                        recipe,
-                        {
-                            params: {
-                                userId: user.id,
-                                date: formattedDate
-                            },
-                            withCredentials: true
-                        }
-                    )
-                    if (response.status === 200) {
-                        console.log("Recipe successfully added into meal plan");
-                        message.success("Added recipe into meal plan successfully.");
-                    } else {
-                        console.log("Failed to add recipe into meal plan");
-                        message.error("Failed to add recipe into meal plan, please try again.");
-                    }
-                } catch (error) {
-                    if (error && error.response && error.response.status === 409) {
-                        message.error("Recipe already in meal plan");
-                    } else {
-                        console.error("error adding recipe into meal plan: ", error);
-                        message.error("An unexpected error happened, please try again");
-                    }
-                }
-            }
-            handleMealPlanModalCancel(); // Close the modal after submission
-        } else {
+        if (user == null) {
             message.info("Login Required");
             handleMealPlanModalCancel();
             setLoginModalVisible(true);
+            return;
+        }
+        if (selectedDate == null) {
+            message.error("Please select a valid date!");
+            return;
+        }
+        const formattedDate = selectedDate.format("YYYY-MM-DD");
+        try {
+            await addRecipeToMealPlan(formattedDate);
+            message.success("Added recipe into meal plan successfully");
+        } catch (error) {
+            handleMealPlanError(error);
+        } finally {
+            handleMealPlanModalCancel();
         }
     };
 
+    const addRecipeToMealPlan = async (formattedDate) => {
+        const response = await axios.put(
+            "http://localhost:8080/api/mealplan/update",
+            recipe,
+            {
+                params: {
+                    userId: user.id,
+                    date: formattedDate
+                },
+                withCredentials: true
+            }
+        );
+
+        if (response.status !== 200) {
+            throw new Error("Failed to add recipe into meal plan");
+        }
+    }
+
+    const handleMealPlanError = (error) => {
+        if (error?.response?.status === 409) {
+            message.error("Recipe already in meal plan");
+        } else {
+            message.error("Failed to add recipe into meal plan");
+            console.log("Error occurred when adding to meal plan", error);
+        }
+    }
     const handleAddToMealPlan = () => {
         if (user != null) {
             setAddToMealPlanVisible(true);
@@ -282,7 +287,7 @@ const ResultComponent = () => {
                     console.error("Failed to add recipe to favorites");
                 }
             } catch (error) {
-                if (error && error.response && error.response.status === 409) {
+                if (error?.response?.status === 409) {
                     message.error("Recipe already in favourites");
                 }
                 else {
