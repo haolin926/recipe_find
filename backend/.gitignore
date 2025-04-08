@@ -18,6 +18,7 @@ target/
 .idea
 *.iws
 *.iml
+sqldialects.xml
 *.ipr
 
 ### NetBeans ###
