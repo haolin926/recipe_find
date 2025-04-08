@@ -44,6 +44,19 @@ mvn clean install
    - `OPENAI_API_KEY`: Your OpenAI API key.
    - `SECRET_KEY`: A secret key for JWT token generation.
 7. Run the application.
+### Model Setup
+1. Navigate to the model directory.
+```
+cd model
+```
+2. Install the dependencies.
+```
+pip install -r requirements.txt
+```
+3. Start the Flask application.
+```
+python predict.py
+```
 ### Frontend Setup
 1. Navigate to the frontend directory.
 ```
